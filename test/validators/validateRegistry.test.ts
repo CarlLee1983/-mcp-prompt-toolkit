@@ -64,31 +64,41 @@ describe('validateRegistry', () => {
 
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.errors.length).toBeGreaterThan(0)
+        expect(result.errors).toBeDefined()
+        expect(result.errors!.length).toBeGreaterThan(0)
+        expect(result.errors!.some(e => e.code === 'REGISTRY_SCHEMA_INVALID')).toBe(true)
       }
     })
   })
 
   describe('Group folder does not exist', () => {
-    it('should throw an error when group folder does not exist', () => {
+    it('should return an error when group folder does not exist', () => {
       const registryPath = tempDir.writeFile('registry.yaml', validRegistryYaml)
       // Do not create common and laravel directories
 
-      expect(() => {
-        validateRegistry(registryPath, tempDir.getPath())
-      }).toThrow('Group folder not found')
+      const result = validateRegistry(registryPath, tempDir.getPath())
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.errors).toBeDefined()
+        expect(result.errors!.some(e => e.code === 'REGISTRY_GROUP_NOT_FOUND')).toBe(true)
+      }
     })
   })
 
   describe('Prompt file does not exist', () => {
-    it('should throw an error when prompt file does not exist', () => {
+    it('should return an error when prompt file does not exist', () => {
       const registryPath = tempDir.writeFile('registry.yaml', validRegistryYaml)
       tempDir.mkdir('common')
       // Do not create prompt files
 
-      expect(() => {
-        validateRegistry(registryPath, tempDir.getPath())
-      }).toThrow('Prompt not found')
+      const result = validateRegistry(registryPath, tempDir.getPath())
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.errors).toBeDefined()
+        expect(result.errors!.some(e => e.code === 'REGISTRY_PROMPT_NOT_FOUND')).toBe(true)
+      }
     })
   })
 })

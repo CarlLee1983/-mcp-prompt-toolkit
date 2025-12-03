@@ -59,8 +59,12 @@ describe('validatePromptFile', () => {
 
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.errors.length).toBeGreaterThan(0)
-        expect(result.error.errors.some(e => e.path.includes('id'))).toBe(true)
+        expect(result.errors).toBeDefined()
+        expect(result.errors!.length).toBeGreaterThan(0)
+        expect(result.errors!.some(e => e.code === 'PROMPT_SCHEMA_INVALID')).toBe(true)
+        expect(result.errors!.some(e => 
+          e.details && Array.isArray(e.details.path) && e.details.path.includes('id')
+        )).toBe(true)
       }
     })
 
@@ -71,9 +75,13 @@ describe('validatePromptFile', () => {
 
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.errors.length).toBeGreaterThan(0)
-        expect(result.error.errors.some(e => 
-          e.path.includes('args') || e.message.includes('enum')
+        expect(result.errors).toBeDefined()
+        expect(result.errors!.length).toBeGreaterThan(0)
+        expect(result.errors!.some(e => 
+          e.code === 'PROMPT_SCHEMA_INVALID' && (
+            (e.details && Array.isArray(e.details.path) && e.details.path.includes('args')) ||
+            e.message.includes('enum')
+          )
         )).toBe(true)
       }
     })

@@ -5,6 +5,7 @@ import { validatePartialsUsage } from '../../validators/validatePartialsUsage'
 import { validateRegistry } from '../../validators/validateRegistry'
 import { validatePromptFile } from '../../validators/validatePromptFile'
 import { writeOutput, OutputFormat } from '../utils/output'
+import { formatValidationErrors, formatValidationErrorsJson } from '../utils/formatters'
 import { Logger } from '../utils/logger'
 import ora from 'ora'
 
@@ -55,7 +56,7 @@ checkCommand
         process.exit(0)
       }
 
-      const allErrors: Array<{ file: string; type: string; partial?: string; chain?: string[] }> = []
+      const allErrors: import('../../types/errors').ToolkitError[] = []
 
       for (const group of Object.values(registry.data.groups)) {
         if (!group.enabled) continue
@@ -66,14 +67,16 @@ checkCommand
 
           if (!res.success) continue
 
-          const usageErrors = validatePartialsUsage(res.data.template, partialRoot)
+          const usageErrors = validatePartialsUsage(
+            res.data.template,
+            partialRoot,
+            {
+              checkUnused: true,
+              file: full
+            }
+          )
 
-          for (const e of usageErrors) {
-            allErrors.push({
-              file: `${group.path}/${file}`,
-              ...e
-            })
-          }
+          allErrors.push(...usageErrors)
         }
       }
 
@@ -88,26 +91,13 @@ checkCommand
       } else {
         spinner.fail(`Found ${allErrors.length} partials usage issue(s)!`)
         if (options.format === 'json') {
-          writeOutput({ passed: false, errors: allErrors }, options)
+          writeOutput({
+            passed: false,
+            ...formatValidationErrorsJson(allErrors)
+          }, options)
         } else {
-          Logger.error(`Found ${allErrors.length} partials usage issue(s):\n`)
-          for (const error of allErrors) {
-            // eslint-disable-next-line no-console
-            console.log(`File: ${error.file}`)
-            if (error.type === 'missing-partial') {
-              // eslint-disable-next-line no-console
-              console.log('  Type: Missing partial')
-              // eslint-disable-next-line no-console
-              console.log(`  Partial: ${error.partial}`)
-            } else if (error.type === 'circular-partial') {
-              // eslint-disable-next-line no-console
-              console.log('  Type: Circular dependency')
-              // eslint-disable-next-line no-console
-              console.log(`  Chain: ${error.chain?.join(' → ')}`)
-            }
-            // eslint-disable-next-line no-console
-            console.log('')
-          }
+          // eslint-disable-next-line no-console
+          console.log(formatValidationErrors(allErrors))
         }
         process.exit(1)
       }

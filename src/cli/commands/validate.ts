@@ -1,6 +1,7 @@
 import { Command } from 'commander'
 import path from 'path'
 import fs from 'fs'
+import type { Severity } from '../../types/errors'
 import { validatePromptRepo } from '../../validators/validateRepo'
 import { validateRegistry } from '../../validators/validateRegistry'
 import { validatePromptFile } from '../../validators/validatePromptFile'
@@ -20,7 +21,8 @@ validateCommand
   .option('-f, --format <format>', 'Output format (text|json)', 'text')
   .option('-o, --output <file>', 'Output file path')
   .option('--exit-code', 'Exit with non-zero code on validation failure', false)
-  .action(async (repoPath: string, options: { format: OutputFormat; output?: string; exitCode: boolean }) => {
+  .option('-s, --severity <level>', 'Minimum severity level (error|warning|info|debug)', 'error')
+  .action(async (repoPath: string, options: { format: OutputFormat; output?: string; exitCode: boolean; severity: string }) => {
     const spinner = ora('Validating repository...').start()
 
     try {
@@ -30,7 +32,8 @@ validateCommand
         process.exit(1)
       }
 
-      const result = validatePromptRepo(resolvedPath)
+      const severity = options.severity as Severity
+      const result = validatePromptRepo(resolvedPath, { minSeverity: severity })
 
       if (result.passed) {
         spinner.succeed('Repository validation passed!')
@@ -66,7 +69,8 @@ validateCommand
   .argument('[path]', 'Registry file path', 'registry.yaml')
   .option('-r, --repo-root <path>', 'Repository root path', process.cwd())
   .option('-f, --format <format>', 'Output format (text|json)', 'text')
-  .action((registryPath: string, options: { repoRoot: string; format: OutputFormat }) => {
+  .option('-s, --severity <level>', 'Minimum severity level (error|warning|info|debug)', 'error')
+  .action((registryPath: string, options: { repoRoot: string; format: OutputFormat; severity: string }) => {
     const spinner = ora('Validating registry...').start()
 
     try {
@@ -90,12 +94,18 @@ validateCommand
         process.exit(0)
       } else {
         spinner.fail('Registry validation failed!')
+        const severity = options.severity as Severity
+        const filteredErrors = result.errors?.filter(err => {
+          const severityLevels: Record<Severity, number> = { error: 0, warning: 1, info: 2, debug: 3 }
+          return severityLevels[err.severity] <= severityLevels[severity]
+        }) || []
+        
         if (options.format === 'json') {
-          writeOutput({ success: false, error: result.error }, options)
+          writeOutput({ success: false, errors: formatValidationErrorsJson(filteredErrors) }, options)
         } else {
           Logger.error('Registry validation failed:')
           // eslint-disable-next-line no-console
-          console.log(result.error.errors.map(e => `  - ${e.path.join('.')}: ${e.message}`).join('\n'))
+          console.log(formatValidationErrors(filteredErrors))
         }
         process.exit(1)
       }
@@ -111,7 +121,8 @@ validateCommand
   .description('Validate a single prompt file')
   .argument('<file-path>', 'Path to prompt YAML file')
   .option('-f, --format <format>', 'Output format (text|json)', 'text')
-  .action((filePath: string, options: { format: OutputFormat }) => {
+  .option('-s, --severity <level>', 'Minimum severity level (error|warning|info|debug)', 'error')
+  .action((filePath: string, options: { format: OutputFormat; severity: string }) => {
     const spinner = ora('Validating prompt file...').start()
 
     try {
@@ -134,12 +145,18 @@ validateCommand
         process.exit(0)
       } else {
         spinner.fail('Prompt file validation failed!')
+        const severity = options.severity as Severity
+        const severityLevels: Record<Severity, number> = { error: 0, warning: 1, info: 2, debug: 3 }
+        const filteredErrors = result.errors?.filter(err => 
+          severityLevels[err.severity] <= severityLevels[severity]
+        ) || []
+        
         if (options.format === 'json') {
-          writeOutput({ success: false, error: result.error }, options)
+          writeOutput({ success: false, errors: formatValidationErrorsJson(filteredErrors) }, options)
         } else {
           Logger.error('Prompt file validation failed:')
           // eslint-disable-next-line no-console
-          console.log(result.error.errors.map(e => `  - ${e.path.join('.')}: ${e.message}`).join('\n'))
+          console.log(formatValidationErrors(filteredErrors))
         }
         process.exit(1)
       }
@@ -156,7 +173,8 @@ validateCommand
   .argument('[path]', 'Repository root path', process.cwd())
   .option('-p, --partials-path <path>', 'Partials directory path relative to repo root', 'partials')
   .option('-f, --format <format>', 'Output format (text|json)', 'text')
-  .action((repoPath: string, options: { partialsPath: string; format: OutputFormat }) => {
+  .option('-s, --severity <level>', 'Minimum severity level (error|warning|info|debug)', 'error')
+  .action((repoPath: string, options: { partialsPath: string; format: OutputFormat; severity: string }) => {
     const spinner = ora('Validating partials...').start()
 
     try {
@@ -167,14 +185,31 @@ validateCommand
         process.exit(1)
       }
 
-      const partials = validatePartials(resolvedPath, options.partialsPath)
+      const result = validatePartials(resolvedPath, options.partialsPath)
 
-      spinner.succeed(`Found ${partials.length} partial file(s)!`)
+      if (!result.success) {
+        spinner.fail('Partials validation failed!')
+        const severity = options.severity as Severity
+        const severityLevels: Record<Severity, number> = { error: 0, warning: 1, info: 2, debug: 3 }
+        const filteredErrors = result.errors?.filter(err => 
+          severityLevels[err.severity] <= severityLevels[severity]
+        ) || []
+        
+        if (options.format === 'json') {
+          writeOutput({ success: false, errors: formatValidationErrorsJson(filteredErrors) }, options)
+        } else {
+          // eslint-disable-next-line no-console
+          console.log(formatValidationErrors(filteredErrors))
+        }
+        process.exit(1)
+      }
+
+      spinner.succeed(`Found ${result.partials?.length || 0} partial file(s)!`)
       if (options.format === 'json') {
-        writeOutput({ partials, count: partials.length }, options)
+        writeOutput({ partials: result.partials, count: result.partials?.length || 0 }, options)
       } else {
-        Logger.success(`Found ${partials.length} partial file(s):`)
-        partials.forEach(p => {
+        Logger.success(`Found ${result.partials?.length || 0} partial file(s):`)
+        result.partials?.forEach(p => {
           // eslint-disable-next-line no-console
           console.log(`  - ${p}`)
         })

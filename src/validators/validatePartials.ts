@@ -1,14 +1,40 @@
 import fs from 'fs'
 import path from 'path'
 import { walkDir } from '../utils/walkDir'
+import type { ToolkitError } from '../types/errors'
+import { createToolkitError } from '../schema/errors'
 
-export function validatePartials(repoRoot: string, partialPath?: string) {
-  if (!partialPath) return []
+export interface ValidatePartialsResult {
+  success: boolean
+  partials?: string[]
+  errors?: ToolkitError[]
+}
+
+export function validatePartials(repoRoot: string, partialPath?: string): ValidatePartialsResult {
+  if (!partialPath) {
+    return {
+      success: true,
+      partials: []
+    }
+  }
 
   const fullPath = path.join(repoRoot, partialPath)
   if (!fs.existsSync(fullPath)) {
-    throw new Error('Partials folder not found')
+    return {
+      success: false,
+      errors: [
+        createToolkitError(
+          'PARTIALS_FOLDER_NOT_FOUND',
+          `Partials folder not found: ${fullPath}`,
+          undefined,
+          { expectedPath: fullPath }
+        )
+      ]
+    }
   }
 
-  return walkDir(fullPath)
+  return {
+    success: true,
+    partials: walkDir(fullPath)
+  }
 }

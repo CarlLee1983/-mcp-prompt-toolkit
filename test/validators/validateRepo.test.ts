@@ -75,9 +75,10 @@ groups:
       const result = validatePromptRepo(tempDir.getPath())
 
       expect(result.passed).toBe(false)
-      expect(result.errors).toHaveLength(1)
-      expect(result.errors[0].file).toBe('code-review.yaml')
-      expect(result.errors[0].errors).toBeDefined()
+      expect(result.errors.length).toBeGreaterThan(0)
+      const fileError = result.errors.find(e => e.file && e.file.includes('code-review.yaml'))
+      expect(fileError).toBeDefined()
+      expect(fileError?.code).toBe('PROMPT_SCHEMA_INVALID')
     })
 
     it('should collect all errors when there are multiple validation failures', () => {
@@ -172,11 +173,11 @@ groups:
       expect(result.passed).toBe(false)
       expect(result.errors.length).toBeGreaterThan(0)
       const missingPartialError = result.errors.find(
-        e => e.type === 'missing-partial' && e.file === 'api-design.yaml'
+        e => e.code === 'PARTIAL_MISSING' && e.file && e.file.includes('api-design.yaml')
       )
       expect(missingPartialError).toBeDefined()
-      if (missingPartialError && missingPartialError.type === 'missing-partial') {
-        expect(missingPartialError.partial).toBe('missing-partial')
+      if (missingPartialError) {
+        expect(missingPartialError.details?.partial).toBe('missing-partial')
       }
     })
 
@@ -210,7 +211,7 @@ template: |
       expect(result.passed).toBe(false)
       expect(result.errors.length).toBeGreaterThan(0)
       const circularError = result.errors.find(
-        e => e.type === 'circular-partial' && e.file === 'api-design.yaml'
+        e => e.code === 'PARTIAL_CIRCULAR' && e.file && e.file.includes('api-design.yaml')
       )
       expect(circularError).toBeDefined()
     })
@@ -269,8 +270,8 @@ template: |
 
       expect(result.passed).toBe(false)
       expect(result.errors.length).toBeGreaterThanOrEqual(2)
-      const missingError = result.errors.find(e => e.type === 'missing-partial')
-      const circularError = result.errors.find(e => e.type === 'circular-partial')
+      const missingError = result.errors.find(e => e.code === 'PARTIAL_MISSING')
+      const circularError = result.errors.find(e => e.code === 'PARTIAL_CIRCULAR')
       expect(missingError).toBeDefined()
       expect(circularError).toBeDefined()
     })

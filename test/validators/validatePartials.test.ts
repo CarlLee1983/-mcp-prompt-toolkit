@@ -21,9 +21,12 @@ describe('validatePartials', () => {
 
       const result = validatePartials(tempDir.getPath(), 'partials')
 
-      expect(result).toHaveLength(2)
-      expect(result.some(f => f.endsWith('role-expert.hbs'))).toBe(true)
-      expect(result.some(f => f.endsWith('role-helper.hbs'))).toBe(true)
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.partials).toHaveLength(2)
+        expect(result.partials!.some(f => f.endsWith('role-expert.hbs'))).toBe(true)
+        expect(result.partials!.some(f => f.endsWith('role-helper.hbs'))).toBe(true)
+      }
     })
 
     it('should be able to recursively scan nested directories', () => {
@@ -34,9 +37,12 @@ describe('validatePartials', () => {
 
       const result = validatePartials(tempDir.getPath(), 'partials')
 
-      expect(result).toHaveLength(2)
-      expect(result.some(f => f.endsWith('role-expert.hbs'))).toBe(true)
-      expect(result.some(f => f.endsWith('helper.hbs'))).toBe(true)
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.partials).toHaveLength(2)
+        expect(result.partials!.some(f => f.endsWith('role-expert.hbs'))).toBe(true)
+        expect(result.partials!.some(f => f.endsWith('helper.hbs'))).toBe(true)
+      }
     })
   })
 
@@ -44,16 +50,21 @@ describe('validatePartials', () => {
     it('should return an empty array when partials path is undefined', () => {
       const result = validatePartials(tempDir.getPath(), undefined)
 
-      expect(result).toEqual([])
-      expect(result).toHaveLength(0)
+      expect(result.success).toBe(true)
+      expect(result.partials).toEqual([])
+      expect(result.partials).toHaveLength(0)
     })
   })
 
   describe('Partials folder does not exist', () => {
-    it('should throw an error when partials folder does not exist', () => {
-      expect(() => {
-        validatePartials(tempDir.getPath(), 'non-existent-partials')
-      }).toThrow('Partials folder not found')
+    it('should return an error when partials folder does not exist', () => {
+      const result = validatePartials(tempDir.getPath(), 'non-existent-partials')
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.errors).toBeDefined()
+        expect(result.errors!.some(e => e.code === 'PARTIALS_FOLDER_NOT_FOUND')).toBe(true)
+      }
     })
   })
 })

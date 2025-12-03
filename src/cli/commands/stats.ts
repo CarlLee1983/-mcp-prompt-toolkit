@@ -51,8 +51,8 @@ export const statsCommand = new Command('stats')
       // Count partials
       const partialsEnabled = registry.data.partials?.enabled ?? false
       const partialsPath = registry.data.partials?.path ?? 'partials'
-      const partials = partialsEnabled ? validatePartials(resolvedPath, partialsPath) : []
-      const partialCount = partials.length
+      const partialsResult = partialsEnabled ? validatePartials(resolvedPath, partialsPath) : { success: true, partials: [] }
+      const partialCount = partialsResult.success ? (partialsResult.partials?.length || 0) : 0
 
       const stats = {
         repository: {
