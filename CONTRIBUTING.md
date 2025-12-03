@@ -76,48 +76,61 @@ v0.4.0-rc.1
 
 ### Creating a Release
 
-The release process supports two approaches:
+We use `npm version` to manage releases, ensuring `package.json`, commit, and tag are always in sync.
 
-#### Approach 1: Automatic Version Sync (Recommended)
+#### Release Workflow
 
-Simply create and push a version tag. The workflow will automatically update `package.json`:
+1. **Use `npm version` to bump version**:
+   ```bash
+   # For patch releases (0.3.2 → 0.3.3)
+   npm version patch -m "chore: bump version to %s"
+   
+   # For minor releases (0.3.2 → 0.4.0)
+   npm version minor -m "chore: bump version to %s"
+   
+   # For major releases (0.3.2 → 1.0.0)
+   npm version major -m "chore: bump version to %s"
+   ```
+
+   The `npm version` command automatically:
+   - Updates `package.json` version field
+   - Creates a commit with your message (where `%s` is replaced with the version number)
+   - Creates a Git tag in the format `v{version}` (e.g., `v0.3.3`)
+
+2. **Push commits and tags**:
+   ```bash
+   git push --follow-tags
+   ```
+
+   This command pushes both your commits and the newly created tag to the remote repository.
+
+3. **GitHub Actions automatically**:
+   - Detects the tag push event
+   - Extracts version from tag
+   - Verifies version consistency (package.json, commit, and tag should always match)
+   - Builds the project
+   - Runs tests
+   - Creates a GitHub Release with release notes
+   - Publishes to npm (if NPM_TOKEN is configured)
+
+#### Example: Complete Release Process
 
 ```bash
-# 1. Create and push the tag
-git tag -a v0.3.2 -m "Release v0.3.2: Description of changes"
-git push origin main
-git push origin v0.3.2
+# 1. Ensure you're on the main branch and up to date
+git checkout main
+git pull origin main
+
+# 2. Make sure all changes are committed
+git status
+
+# 3. Bump version (patch example)
+npm version patch -m "chore: bump version to %s"
+
+# 4. Push everything (commits and tags)
+git push --follow-tags
 ```
 
-**GitHub Actions will automatically**:
-- Extract version from tag
-- Update `package.json` version to match the tag
-- Verify version consistency
-- Build the project
-- Run tests
-- Commit version update back to repository
-- Create a GitHub Release with release notes
-- Publish to npm (if NPM_TOKEN is configured)
-
-#### Approach 2: Manual Version Update (Optional)
-
-If you prefer to update `package.json` before creating the tag:
-
-```bash
-# 1. Update version in package.json manually
-# Edit package.json and set version to "0.3.2"
-
-# 2. Commit the version change
-git add package.json
-git commit -m "chore: bump version to 0.3.2"
-git push origin main
-
-# 3. Create and push the tag (version should match package.json)
-git tag -a v0.3.2 -m "Release v0.3.2: Description of changes"
-git push origin v0.3.2
-```
-
-**Note**: If `package.json` version doesn't match the tag, the workflow will automatically update it and verify consistency before publishing.
+**Note**: The `npm version` command ensures that `package.json`, the commit, and the tag are always synchronized. The GitHub Actions workflow will verify this consistency before publishing.
 
 ## Release Notes
 
