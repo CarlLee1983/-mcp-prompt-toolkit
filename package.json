@@ -1,0 +1,31 @@
+{
+    "name": "@carllee1983/prompt-toolkit",
+    "version": "0.1.0",
+    "description": "Prompt repository governance toolkit for MCP",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": ["dist"],
+    "scripts": {
+      "build": "tsup src/index.ts --dts",
+      "dev": "tsup src/index.ts --dts --watch",
+      "lint": "eslint .",
+      "test": "vitest",
+      "test:coverage": "vitest --coverage",
+      "test:run": "vitest run"
+    },
+    "keywords": ["mcp", "prompt", "toolkit", "ai", "governance"],
+    "author": "CarlLee1983",
+    "license": "ISC",
+    "devDependencies": {
+      "@types/node": "^20.0.0",
+      "tsup": "^8.0.0",
+      "typescript": "^5.4.0",
+      "vitest": "^1.5.0"
+    },
+    "dependencies": {
+      "zod": "^3.23.0",
+      "js-yaml": "^4.1.0",
+      "glob": "^10.3.0"
+    }
+  }
+  
