@@ -6,7 +6,7 @@ import { buildPartialGraph } from '../partials/buildPartialGraph'
 import { detectCircular } from '../partials/detectCircular'
 import { walkDir } from '../utils/walkDir'
 import type { ToolkitError } from '../types/errors'
-import { createToolkitError } from '../schema/errors'
+import { createToolkitError, ERROR_CODE_CONSTANTS } from '../schema/errors'
 
 export interface ValidatePartialsUsageOptions {
   checkUnused?: boolean
@@ -46,7 +46,7 @@ export function validatePartialsUsage(
     if (!file) {
       errors.push(
         createToolkitError(
-          'PARTIAL_NOT_FOUND',
+          ERROR_CODE_CONSTANTS.PARTIAL_NOT_FOUND,
           `Partial file not found: ${name}`,
           options.file,
           { partial: name },
@@ -77,7 +77,7 @@ export function validatePartialsUsage(
     })
     errors.push(
       createToolkitError(
-        'PARTIAL_CIRCULAR_DEPENDENCY',
+        ERROR_CODE_CONSTANTS.PARTIAL_CIRCULAR_DEPENDENCY,
         `Circular dependency detected: ${partialNames.join(' → ')}`,
         options.file,
         { chain: partialNames },
@@ -95,7 +95,7 @@ export function validatePartialsUsage(
       if (!usedSet.has(partial)) {
         errors.push(
           createToolkitError(
-            'PARTIAL_UNUSED',
+            ERROR_CODE_CONSTANTS.PARTIAL_UNUSED,
             `Partial file is defined but not used: ${partial}`,
             options.file,
             { partial },

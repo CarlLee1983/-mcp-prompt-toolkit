@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { walkDir } from '../utils/walkDir'
 import type { ToolkitError } from '../types/errors'
-import { createToolkitError } from '../schema/errors'
+import { createToolkitError, ERROR_CODE_CONSTANTS } from '../schema/errors'
 
 export interface ValidatePartialsResult {
   success: boolean
@@ -24,7 +24,7 @@ export function validatePartials(repoRoot: string, partialPath?: string): Valida
       success: false,
       errors: [
         createToolkitError(
-          'PARTIAL_PATH_INVALID',
+          ERROR_CODE_CONSTANTS.PARTIAL_PATH_INVALID,
           `Partials path is invalid: ${fullPath}`,
           undefined,
           { expectedPath: fullPath },

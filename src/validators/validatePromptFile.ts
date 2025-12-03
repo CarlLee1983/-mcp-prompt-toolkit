@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { loadYaml } from '../utils/loadYaml'
 import { PromptSchema } from '../schema/prompt.schema'
 import type { ToolkitError } from '../types/errors'
-import { createToolkitError } from '../schema/errors'
+import { createToolkitError, ERROR_CODE_CONSTANTS } from '../schema/errors'
 
 export interface ValidatePromptFileResult {
   success: boolean
@@ -21,7 +21,7 @@ export function validatePromptFile(filePath: string): ValidatePromptFileResult {
       success: false,
       errors: [
         createToolkitError(
-          'PROMPT_SCHEMA_INVALID',
+          ERROR_CODE_CONSTANTS.PROMPT_SCHEMA_INVALID,
           error instanceof Error ? error.message : 'Failed to load prompt file',
           filePath,
           { originalError: String(error) },
@@ -35,8 +35,8 @@ export function validatePromptFile(filePath: string): ValidatePromptFileResult {
   
   if (!result.success) {
     const errors: ToolkitError[] = result.error.errors.map(err => 
-      createToolkitError(
-        'PROMPT_SCHEMA_INVALID',
+        createToolkitError(
+          ERROR_CODE_CONSTANTS.PROMPT_SCHEMA_INVALID,
         `${err.path.join('.')}: ${err.message}`,
         filePath,
         {
@@ -58,7 +58,7 @@ export function validatePromptFile(filePath: string): ValidatePromptFileResult {
   if (!result.data.template || result.data.template.trim().length === 0) {
     errors.push(
       createToolkitError(
-        'PROMPT_TEMPLATE_EMPTY',
+        ERROR_CODE_CONSTANTS.PROMPT_TEMPLATE_EMPTY,
         'Prompt template is empty',
         filePath,
         { promptId: result.data.id },

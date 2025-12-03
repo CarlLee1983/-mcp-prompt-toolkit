@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { loadYaml } from '../utils/loadYaml'
 import { RegistrySchema } from '../schema/registry.schema'
 import type { ToolkitError } from '../types/errors'
-import { createToolkitError } from '../schema/errors'
+import { createToolkitError, ERROR_CODE_CONSTANTS } from '../schema/errors'
 
 export interface ValidateRegistryResult {
   success: boolean
@@ -19,7 +19,7 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
       success: false,
       errors: [
         createToolkitError(
-          'REGISTRY_FILE_NOT_FOUND',
+          ERROR_CODE_CONSTANTS.REGISTRY_FILE_NOT_FOUND,
           `Registry file not found: ${registryPath}`,
           registryPath,
           { expectedPath: registryPath },
@@ -39,7 +39,7 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
       success: false,
       errors: [
         createToolkitError(
-          'REGISTRY_SCHEMA_INVALID',
+          ERROR_CODE_CONSTANTS.REGISTRY_SCHEMA_INVALID,
           error instanceof Error ? error.message : 'Failed to load registry file',
           registryPath,
           { originalError: String(error) },
@@ -51,8 +51,8 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
 
   if (!parsed.success) {
     const errors: ToolkitError[] = parsed.error.errors.map(err =>
-      createToolkitError(
-        'REGISTRY_SCHEMA_INVALID',
+        createToolkitError(
+          ERROR_CODE_CONSTANTS.REGISTRY_SCHEMA_INVALID,
         `${err.path.join('.')}: ${err.message}`,
         registryPath,
         {
@@ -82,7 +82,7 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
     if (!fs.existsSync(groupPath)) {
       errors.push(
         createToolkitError(
-          'REGISTRY_GROUP_NOT_FOUND',
+          ERROR_CODE_CONSTANTS.REGISTRY_GROUP_NOT_FOUND,
           `Group folder not found: ${group}`,
           registryPath,
           {
@@ -100,7 +100,7 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
       if (!fs.existsSync(full)) {
         errors.push(
           createToolkitError(
-            'REGISTRY_PROMPT_NOT_FOUND',
+            ERROR_CODE_CONSTANTS.REGISTRY_PROMPT_NOT_FOUND,
             `Prompt not found: ${group}/${prompt}`,
             registryPath,
             {

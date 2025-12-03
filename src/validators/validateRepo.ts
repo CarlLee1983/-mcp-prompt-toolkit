@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import type { Severity, ToolkitError } from '../types/errors'
-import { createToolkitError } from '../schema/errors'
+import { createToolkitError, ERROR_CODE_CONSTANTS } from '../schema/errors'
 import { validateRegistry } from './validateRegistry'
 import { validatePromptFile } from './validatePromptFile'
 import { validatePartialsUsage } from './validatePartialsUsage'
@@ -49,7 +49,7 @@ export function validatePromptRepo(
   // Check if repo root exists
   if (!fs.existsSync(repoRoot)) {
     const error = createToolkitError(
-      'REPO_ROOT_NOT_FOUND',
+      ERROR_CODE_CONSTANTS.REPO_ROOT_NOT_FOUND,
       `Repository root path not found: ${repoRoot}`,
       undefined,
       { expectedPath: repoRoot },

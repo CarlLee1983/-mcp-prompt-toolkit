@@ -1,5 +1,41 @@
 import type { Severity } from '../types/errors'
 
+// 錯誤碼常數定義（避免拼寫錯誤，提供型別安全）
+export const ERROR_CODE_CONSTANTS = {
+  // Registry related errors
+  REGISTRY_FILE_NOT_FOUND: 'REGISTRY_FILE_NOT_FOUND',
+  REGISTRY_SCHEMA_INVALID: 'REGISTRY_SCHEMA_INVALID',
+  REGISTRY_GROUP_NOT_FOUND: 'REGISTRY_GROUP_NOT_FOUND',
+  REGISTRY_PROMPT_NOT_FOUND: 'REGISTRY_PROMPT_NOT_FOUND',
+  REGISTRY_DISABLED_GROUP: 'REGISTRY_DISABLED_GROUP',
+
+  // Prompt file related errors
+  PROMPT_SCHEMA_INVALID: 'PROMPT_SCHEMA_INVALID',
+  PROMPT_ID_DUPLICATED: 'PROMPT_ID_DUPLICATED',
+  PROMPT_ARG_INVALID: 'PROMPT_ARG_INVALID',
+  PROMPT_TEMPLATE_EMPTY: 'PROMPT_TEMPLATE_EMPTY',
+
+  // Partials related errors
+  PARTIAL_NOT_FOUND: 'PARTIAL_NOT_FOUND',
+  PARTIAL_UNUSED: 'PARTIAL_UNUSED',
+  PARTIAL_CIRCULAR_DEPENDENCY: 'PARTIAL_CIRCULAR_DEPENDENCY',
+  PARTIAL_PATH_INVALID: 'PARTIAL_PATH_INVALID',
+
+  // Repository related errors
+  REPO_ROOT_NOT_FOUND: 'REPO_ROOT_NOT_FOUND',
+  REPO_STRUCTURE_INVALID: 'REPO_STRUCTURE_INVALID',
+
+  // File related errors
+  FILE_READ_FAILED: 'FILE_READ_FAILED',
+  FILE_NOT_YAML: 'FILE_NOT_YAML',
+
+  // CLI related errors
+  CLI_INVALID_ARGUMENT: 'CLI_INVALID_ARGUMENT',
+  CLI_UNKNOWN_COMMAND: 'CLI_UNKNOWN_COMMAND'
+} as const
+
+export type ErrorCode = typeof ERROR_CODE_CONSTANTS[keyof typeof ERROR_CODE_CONSTANTS]
+
 export interface ErrorCodeDefinition {
   code: string
   severity: Severity
@@ -8,108 +44,108 @@ export interface ErrorCodeDefinition {
 
 export const ERROR_CODES: Record<string, ErrorCodeDefinition> = {
   // Registry related errors
-  REGISTRY_FILE_NOT_FOUND: {
-    code: 'REGISTRY_FILE_NOT_FOUND',
+  [ERROR_CODE_CONSTANTS.REGISTRY_FILE_NOT_FOUND]: {
+    code: ERROR_CODE_CONSTANTS.REGISTRY_FILE_NOT_FOUND,
     severity: 'fatal',
     defaultMessage: 'Registry file not found'
   },
-  REGISTRY_SCHEMA_INVALID: {
-    code: 'REGISTRY_SCHEMA_INVALID',
+  [ERROR_CODE_CONSTANTS.REGISTRY_SCHEMA_INVALID]: {
+    code: ERROR_CODE_CONSTANTS.REGISTRY_SCHEMA_INVALID,
     severity: 'error',
     defaultMessage: 'Registry schema validation failed'
   },
-  REGISTRY_GROUP_NOT_FOUND: {
-    code: 'REGISTRY_GROUP_NOT_FOUND',
+  [ERROR_CODE_CONSTANTS.REGISTRY_GROUP_NOT_FOUND]: {
+    code: ERROR_CODE_CONSTANTS.REGISTRY_GROUP_NOT_FOUND,
     severity: 'error',
     defaultMessage: 'Group folder not found'
   },
-  REGISTRY_PROMPT_NOT_FOUND: {
-    code: 'REGISTRY_PROMPT_NOT_FOUND',
+  [ERROR_CODE_CONSTANTS.REGISTRY_PROMPT_NOT_FOUND]: {
+    code: ERROR_CODE_CONSTANTS.REGISTRY_PROMPT_NOT_FOUND,
     severity: 'error',
     defaultMessage: 'Prompt file not found'
   },
-  REGISTRY_DISABLED_GROUP: {
-    code: 'REGISTRY_DISABLED_GROUP',
+  [ERROR_CODE_CONSTANTS.REGISTRY_DISABLED_GROUP]: {
+    code: ERROR_CODE_CONSTANTS.REGISTRY_DISABLED_GROUP,
     severity: 'info',
     defaultMessage: 'Group is disabled'
   },
 
   // Prompt file related errors
-  PROMPT_SCHEMA_INVALID: {
-    code: 'PROMPT_SCHEMA_INVALID',
+  [ERROR_CODE_CONSTANTS.PROMPT_SCHEMA_INVALID]: {
+    code: ERROR_CODE_CONSTANTS.PROMPT_SCHEMA_INVALID,
     severity: 'error',
     defaultMessage: 'Prompt schema validation failed'
   },
-  PROMPT_ID_DUPLICATED: {
-    code: 'PROMPT_ID_DUPLICATED',
+  [ERROR_CODE_CONSTANTS.PROMPT_ID_DUPLICATED]: {
+    code: ERROR_CODE_CONSTANTS.PROMPT_ID_DUPLICATED,
     severity: 'error',
     defaultMessage: 'Prompt ID is duplicated'
   },
-  PROMPT_ARG_INVALID: {
-    code: 'PROMPT_ARG_INVALID',
+  [ERROR_CODE_CONSTANTS.PROMPT_ARG_INVALID]: {
+    code: ERROR_CODE_CONSTANTS.PROMPT_ARG_INVALID,
     severity: 'error',
     defaultMessage: 'Prompt argument validation failed'
   },
-  PROMPT_TEMPLATE_EMPTY: {
-    code: 'PROMPT_TEMPLATE_EMPTY',
+  [ERROR_CODE_CONSTANTS.PROMPT_TEMPLATE_EMPTY]: {
+    code: ERROR_CODE_CONSTANTS.PROMPT_TEMPLATE_EMPTY,
     severity: 'error',
     defaultMessage: 'Prompt template is empty'
   },
 
   // Partials related errors
-  PARTIAL_NOT_FOUND: {
-    code: 'PARTIAL_NOT_FOUND',
+  [ERROR_CODE_CONSTANTS.PARTIAL_NOT_FOUND]: {
+    code: ERROR_CODE_CONSTANTS.PARTIAL_NOT_FOUND,
     severity: 'error',
     defaultMessage: 'Partial file not found'
   },
-  PARTIAL_UNUSED: {
-    code: 'PARTIAL_UNUSED',
+  [ERROR_CODE_CONSTANTS.PARTIAL_UNUSED]: {
+    code: ERROR_CODE_CONSTANTS.PARTIAL_UNUSED,
     severity: 'warning',
     defaultMessage: 'Partial file is defined but not used'
   },
-  PARTIAL_CIRCULAR_DEPENDENCY: {
-    code: 'PARTIAL_CIRCULAR_DEPENDENCY',
+  [ERROR_CODE_CONSTANTS.PARTIAL_CIRCULAR_DEPENDENCY]: {
+    code: ERROR_CODE_CONSTANTS.PARTIAL_CIRCULAR_DEPENDENCY,
     severity: 'error',
     defaultMessage: 'Circular dependency detected in partials'
   },
-  PARTIAL_PATH_INVALID: {
-    code: 'PARTIAL_PATH_INVALID',
+  [ERROR_CODE_CONSTANTS.PARTIAL_PATH_INVALID]: {
+    code: ERROR_CODE_CONSTANTS.PARTIAL_PATH_INVALID,
     severity: 'error',
     defaultMessage: 'Partials path is invalid'
   },
 
   // Repository related errors
-  REPO_ROOT_NOT_FOUND: {
-    code: 'REPO_ROOT_NOT_FOUND',
+  [ERROR_CODE_CONSTANTS.REPO_ROOT_NOT_FOUND]: {
+    code: ERROR_CODE_CONSTANTS.REPO_ROOT_NOT_FOUND,
     severity: 'fatal',
     defaultMessage: 'Repository root path not found'
   },
-  REPO_STRUCTURE_INVALID: {
-    code: 'REPO_STRUCTURE_INVALID',
+  [ERROR_CODE_CONSTANTS.REPO_STRUCTURE_INVALID]: {
+    code: ERROR_CODE_CONSTANTS.REPO_STRUCTURE_INVALID,
     severity: 'error',
     defaultMessage: 'Repository structure is invalid'
   },
 
   // File related errors
-  FILE_READ_FAILED: {
-    code: 'FILE_READ_FAILED',
+  [ERROR_CODE_CONSTANTS.FILE_READ_FAILED]: {
+    code: ERROR_CODE_CONSTANTS.FILE_READ_FAILED,
     severity: 'fatal',
     defaultMessage: 'Failed to read file'
   },
-  FILE_NOT_YAML: {
-    code: 'FILE_NOT_YAML',
+  [ERROR_CODE_CONSTANTS.FILE_NOT_YAML]: {
+    code: ERROR_CODE_CONSTANTS.FILE_NOT_YAML,
     severity: 'error',
     defaultMessage: 'File is not a valid YAML file'
   },
 
   // CLI related errors
-  CLI_INVALID_ARGUMENT: {
-    code: 'CLI_INVALID_ARGUMENT',
+  [ERROR_CODE_CONSTANTS.CLI_INVALID_ARGUMENT]: {
+    code: ERROR_CODE_CONSTANTS.CLI_INVALID_ARGUMENT,
     severity: 'fatal',
     defaultMessage: 'Invalid CLI argument'
   },
-  CLI_UNKNOWN_COMMAND: {
-    code: 'CLI_UNKNOWN_COMMAND',
+  [ERROR_CODE_CONSTANTS.CLI_UNKNOWN_COMMAND]: {
+    code: ERROR_CODE_CONSTANTS.CLI_UNKNOWN_COMMAND,
     severity: 'fatal',
     defaultMessage: 'Unknown CLI command'
   }

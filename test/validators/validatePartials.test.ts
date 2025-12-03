@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { validatePartials } from '../../src/validators/validatePartials'
 import { TempDir } from '../helpers/tempDir'
+import { ERROR_CODE_CONSTANTS } from '../../src/schema/errors'
 
 describe('validatePartials', () => {
   let tempDir: TempDir
@@ -63,7 +64,7 @@ describe('validatePartials', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.errors).toBeDefined()
-        expect(result.errors!.some(e => e.code === 'PARTIAL_PATH_INVALID')).toBe(true)
+        expect(result.errors!.some(e => e.code === ERROR_CODE_CONSTANTS.PARTIAL_PATH_INVALID)).toBe(true)
       }
     })
   })

@@ -7,6 +7,7 @@ import {
   invalidPromptYamlInvalidArgType,
   invalidYamlSyntax
 } from '../helpers/fixtures'
+import { ERROR_CODE_CONSTANTS } from '../../src/schema/errors'
 
 describe('validatePromptFile', () => {
   let tempDir: TempDir
@@ -61,7 +62,7 @@ describe('validatePromptFile', () => {
       if (!result.success) {
         expect(result.errors).toBeDefined()
         expect(result.errors!.length).toBeGreaterThan(0)
-        expect(result.errors!.some(e => e.code === 'PROMPT_SCHEMA_INVALID')).toBe(true)
+        expect(result.errors!.some(e => e.code === ERROR_CODE_CONSTANTS.PROMPT_SCHEMA_INVALID)).toBe(true)
         expect(result.errors!.some(e => 
           e.meta && Array.isArray(e.meta.path) && e.meta.path.includes('id')
         )).toBe(true)
@@ -78,7 +79,7 @@ describe('validatePromptFile', () => {
         expect(result.errors).toBeDefined()
         expect(result.errors!.length).toBeGreaterThan(0)
         expect(result.errors!.some(e => 
-          e.code === 'PROMPT_SCHEMA_INVALID' && (
+          e.code === ERROR_CODE_CONSTANTS.PROMPT_SCHEMA_INVALID && (
             (e.meta && Array.isArray(e.meta.path) && e.meta.path.includes('args')) ||
             e.message.includes('enum')
           )
@@ -95,7 +96,7 @@ describe('validatePromptFile', () => {
       if (!result.success) {
         expect(result.errors).toBeDefined()
         expect(result.errors!.some(e => 
-          e.code === 'FILE_NOT_YAML' || e.code === 'PROMPT_SCHEMA_INVALID'
+          e.code === ERROR_CODE_CONSTANTS.FILE_NOT_YAML || e.code === ERROR_CODE_CONSTANTS.PROMPT_SCHEMA_INVALID
         )).toBe(true)
       }
     })
@@ -111,7 +112,7 @@ describe('validatePromptFile', () => {
       if (!result.success) {
         expect(result.errors).toBeDefined()
         expect(result.errors!.some(e => 
-          e.code === 'FILE_READ_FAILED' || e.code === 'PROMPT_SCHEMA_INVALID'
+          e.code === ERROR_CODE_CONSTANTS.FILE_READ_FAILED || e.code === ERROR_CODE_CONSTANTS.PROMPT_SCHEMA_INVALID
         )).toBe(true)
       }
     })
@@ -133,7 +134,7 @@ template: "   "
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.errors).toBeDefined()
-        expect(result.errors!.some(e => e.code === 'PROMPT_TEMPLATE_EMPTY')).toBe(true)
+        expect(result.errors!.some(e => e.code === ERROR_CODE_CONSTANTS.PROMPT_TEMPLATE_EMPTY)).toBe(true)
       }
     })
   })

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { validateRegistry } from '../../src/validators/validateRegistry'
 import { TempDir } from '../helpers/tempDir'
 import { validRegistryYaml, invalidRegistryYaml } from '../helpers/fixtures'
+import { ERROR_CODE_CONSTANTS } from '../../src/schema/errors'
 
 describe('validateRegistry', () => {
   let tempDir: TempDir
@@ -66,7 +67,7 @@ describe('validateRegistry', () => {
       if (!result.success) {
         expect(result.errors).toBeDefined()
         expect(result.errors!.length).toBeGreaterThan(0)
-        expect(result.errors!.some(e => e.code === 'REGISTRY_SCHEMA_INVALID')).toBe(true)
+        expect(result.errors!.some(e => e.code === ERROR_CODE_CONSTANTS.REGISTRY_SCHEMA_INVALID)).toBe(true)
       }
     })
   })
@@ -81,7 +82,7 @@ describe('validateRegistry', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.errors).toBeDefined()
-        expect(result.errors!.some(e => e.code === 'REGISTRY_GROUP_NOT_FOUND')).toBe(true)
+        expect(result.errors!.some(e => e.code === ERROR_CODE_CONSTANTS.REGISTRY_GROUP_NOT_FOUND)).toBe(true)
       }
     })
   })
@@ -97,7 +98,7 @@ describe('validateRegistry', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.errors).toBeDefined()
-        expect(result.errors!.some(e => e.code === 'REGISTRY_PROMPT_NOT_FOUND')).toBe(true)
+        expect(result.errors!.some(e => e.code === ERROR_CODE_CONSTANTS.REGISTRY_PROMPT_NOT_FOUND)).toBe(true)
       }
     })
   })

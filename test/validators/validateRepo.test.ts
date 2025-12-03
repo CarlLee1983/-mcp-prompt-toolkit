@@ -8,6 +8,7 @@ import {
   promptYamlWithPartials,
   promptYamlWithMissingPartial
 } from '../helpers/fixtures'
+import { ERROR_CODE_CONSTANTS } from '../../src/schema/errors'
 
 describe('validatePromptRepo', () => {
   let tempDir: TempDir
@@ -78,7 +79,7 @@ groups:
       expect(result.errors.length).toBeGreaterThan(0)
       const fileError = result.errors.find(e => e.file && e.file.includes('code-review.yaml'))
       expect(fileError).toBeDefined()
-      expect(fileError?.code).toBe('PROMPT_SCHEMA_INVALID')
+      expect(fileError?.code).toBe(ERROR_CODE_CONSTANTS.PROMPT_SCHEMA_INVALID)
     })
 
     it('should collect all errors when there are multiple validation failures', () => {
@@ -173,7 +174,7 @@ groups:
       expect(result.passed).toBe(false)
       expect(result.errors.length).toBeGreaterThan(0)
       const missingPartialError = result.errors.find(
-        e => e.code === 'PARTIAL_NOT_FOUND' && e.file && e.file.includes('api-design.yaml')
+        e => e.code === ERROR_CODE_CONSTANTS.PARTIAL_NOT_FOUND && e.file && e.file.includes('api-design.yaml')
       )
       expect(missingPartialError).toBeDefined()
       if (missingPartialError) {
@@ -211,7 +212,7 @@ template: |
       expect(result.passed).toBe(false)
       expect(result.errors.length).toBeGreaterThan(0)
       const circularError = result.errors.find(
-        e => e.code === 'PARTIAL_CIRCULAR_DEPENDENCY' && e.file && e.file.includes('api-design.yaml')
+        e => e.code === ERROR_CODE_CONSTANTS.PARTIAL_CIRCULAR_DEPENDENCY && e.file && e.file.includes('api-design.yaml')
       )
       expect(circularError).toBeDefined()
     })
@@ -270,8 +271,8 @@ template: |
 
       expect(result.passed).toBe(false)
       expect(result.errors.length).toBeGreaterThanOrEqual(2)
-      const missingError = result.errors.find(e => e.code === 'PARTIAL_NOT_FOUND')
-      const circularError = result.errors.find(e => e.code === 'PARTIAL_CIRCULAR_DEPENDENCY')
+      const missingError = result.errors.find(e => e.code === ERROR_CODE_CONSTANTS.PARTIAL_NOT_FOUND)
+      const circularError = result.errors.find(e => e.code === ERROR_CODE_CONSTANTS.PARTIAL_CIRCULAR_DEPENDENCY)
       expect(missingError).toBeDefined()
       expect(circularError).toBeDefined()
     })
@@ -346,7 +347,7 @@ template: |
       expect(result.errors.length).toBeGreaterThan(0)
       const fatalError = result.errors.find(e => e.severity === 'fatal')
       expect(fatalError).toBeDefined()
-      expect(fatalError?.code).toBe('REPO_ROOT_NOT_FOUND')
+      expect(fatalError?.code).toBe(ERROR_CODE_CONSTANTS.REPO_ROOT_NOT_FOUND)
       expect(result.summary.fatal).toBeGreaterThan(0)
     })
 
@@ -359,7 +360,7 @@ template: |
       expect(result.passed).toBe(false)
       const fatalError = result.errors.find(e => e.severity === 'fatal')
       expect(fatalError).toBeDefined()
-      expect(fatalError?.code).toBe('REGISTRY_FILE_NOT_FOUND')
+      expect(fatalError?.code).toBe(ERROR_CODE_CONSTANTS.REGISTRY_FILE_NOT_FOUND)
     })
   })
 })
