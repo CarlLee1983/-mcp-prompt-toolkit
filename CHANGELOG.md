@@ -7,7 +7,32 @@ and this project is licensed under [ISC](LICENSE).
 
 ## [Unreleased]
 
-## [0.4.0] - 2024-12-XX
+## [0.4.1] - 2025-12-03
+
+### Added
+- LICENSE file (ISC License)
+- SECURITY.md with vulnerability reporting guidelines
+- CODE_OF_CONDUCT.md (Contributor Covenant 2.1)
+- GitHub issue templates (bug report, feature request, question)
+- Pull Request template
+- Dependabot configuration for automated dependency updates
+- FUNDING.yml for GitHub Sponsors
+- .npmignore to exclude development files from npm package
+- examples/ directory with comprehensive usage examples:
+  - Basic usage examples (validate repo, file, registry)
+  - CI/CD integration examples (GitHub Actions, GitLab CI)
+  - Advanced scenarios (custom error handling, error code checking)
+
+### Changed
+- Updated README.md with version 0.4.0 information and links to new files
+- Expanded package.json keywords for better discoverability
+- Added engines field to package.json (Node.js >=18.0.0)
+- Updated ESLint config to ignore examples/ directory
+
+### Fixed
+- Fixed unused variable warning in validateRepo.ts
+
+## [0.4.0] - 2025-12-03
 
 ### Added
 - Comprehensive error code system with standardized error codes
