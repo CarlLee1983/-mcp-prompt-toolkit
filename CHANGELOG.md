@@ -7,8 +7,35 @@ and this project is licensed under [ISC](LICENSE).
 
 ## [Unreleased]
 
+## [0.4.0] - 2024-12-XX
+
 ### Added
-- Initial release
+- Comprehensive error code system with standardized error codes
+- Four-level severity system: fatal, error, warning, info
+- Error code categories: REGISTRY, PROMPT, PARTIAL, REPO, FILE, CLI
+- `hint` field in error objects for helpful resolution guidance
+- `meta` field in error objects for additional error metadata
+- Summary statistics in `validatePromptRepo` result (fatal, error, warning, info counts)
+- CLI `--severity` option for filtering errors by minimum severity level
+- Fatal error handling that always causes CLI to exit with code 1
+- Enhanced error formatting with color-coded severity levels (fatal uses red background)
+
+### Changed
+- **BREAKING**: `Severity` type changed from `'error' | 'warning' | 'info' | 'debug'` to `'fatal' | 'error' | 'warning' | 'info'`
+- **BREAKING**: `ToolkitError` interface: `details` field renamed to `meta`, added `hint` field
+- **BREAKING**: `validatePromptRepo` return type now includes `summary` field
+- Error codes renamed for consistency:
+  - `PARTIAL_MISSING` → `PARTIAL_NOT_FOUND`
+  - `PARTIAL_CIRCULAR` → `PARTIAL_CIRCULAR_DEPENDENCY`
+  - `PARTIALS_FOLDER_NOT_FOUND` → `PARTIAL_PATH_INVALID`
+- All validators now return `ToolkitError[]` instead of throwing ZodError
+- `loadYaml` now throws `ToolkitError` instead of raw errors
+- CLI commands updated to support new severity system
+
+### Fixed
+- Improved error handling in file operations
+- Better error messages with contextual hints
+- Consistent error structure across all validators
 
 ## [0.3.1] - 2024-12-XX
 

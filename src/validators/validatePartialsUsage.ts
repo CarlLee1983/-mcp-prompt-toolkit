@@ -46,10 +46,11 @@ export function validatePartialsUsage(
     if (!file) {
       errors.push(
         createToolkitError(
-          'PARTIAL_MISSING',
+          'PARTIAL_NOT_FOUND',
           `Partial file not found: ${name}`,
           options.file,
-          { partial: name }
+          { partial: name },
+          `Create the partial file ${name}.hbs in the partials directory or remove the reference`
         )
       )
       continue
@@ -76,10 +77,11 @@ export function validatePartialsUsage(
     })
     errors.push(
       createToolkitError(
-        'PARTIAL_CIRCULAR',
+        'PARTIAL_CIRCULAR_DEPENDENCY',
         `Circular dependency detected: ${partialNames.join(' → ')}`,
         options.file,
-        { chain: partialNames }
+        { chain: partialNames },
+        'Remove the circular reference by restructuring the partial dependencies'
       )
     )
   }
@@ -96,7 +98,8 @@ export function validatePartialsUsage(
             'PARTIAL_UNUSED',
             `Partial file is defined but not used: ${partial}`,
             options.file,
-            { partial }
+            { partial },
+            'Remove the unused partial file or add a reference to it in a prompt template'
           )
         )
       }

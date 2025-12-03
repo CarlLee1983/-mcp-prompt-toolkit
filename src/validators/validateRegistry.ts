@@ -13,7 +13,42 @@ export interface ValidateRegistryResult {
 }
 
 export function validateRegistry(registryPath: string, repoRoot: string): ValidateRegistryResult {
-  const parsed = RegistrySchema.safeParse(loadYaml(registryPath))
+  // Check if registry file exists
+  if (!fs.existsSync(registryPath)) {
+    return {
+      success: false,
+      errors: [
+        createToolkitError(
+          'REGISTRY_FILE_NOT_FOUND',
+          `Registry file not found: ${registryPath}`,
+          registryPath,
+          { expectedPath: registryPath },
+          'Ensure the registry.yaml file exists in the repository root'
+        )
+      ]
+    }
+  }
+
+  let parsed: z.SafeParseReturnType<unknown, z.infer<typeof RegistrySchema>>
+  try {
+    parsed = RegistrySchema.safeParse(loadYaml(registryPath))
+  } catch (error) {
+    // loadYaml will throw FILE_READ_FAILED or FILE_NOT_YAML
+    // We need to catch and convert to appropriate error
+    return {
+      success: false,
+      errors: [
+        createToolkitError(
+          'REGISTRY_SCHEMA_INVALID',
+          error instanceof Error ? error.message : 'Failed to load registry file',
+          registryPath,
+          { originalError: String(error) },
+          'Check that the registry.yaml file is valid YAML and readable'
+        )
+      ]
+    }
+  }
+
   if (!parsed.success) {
     const errors: ToolkitError[] = parsed.error.errors.map(err =>
       createToolkitError(
@@ -24,7 +59,8 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
           path: err.path,
           message: err.message,
           code: err.code
-        }
+        },
+        'Refer to the registry schema documentation for valid structure'
       )
     )
     return {
@@ -37,6 +73,11 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
   const { groups } = parsed.data
 
   for (const [group, def] of Object.entries(groups)) {
+    if (!def.enabled) {
+      // Skip disabled groups, but could add info level error if needed
+      continue
+    }
+
     const groupPath = path.join(repoRoot, def.path)
     if (!fs.existsSync(groupPath)) {
       errors.push(
@@ -47,7 +88,8 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
           {
             group,
             expectedPath: groupPath
-          }
+          },
+          `Create the directory at ${groupPath} or update the registry path`
         )
       )
       continue
@@ -65,7 +107,8 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
               group,
               prompt,
               expectedPath: full
-            }
+            },
+            `Create the prompt file at ${full} or remove it from the registry`
           )
         )
       }

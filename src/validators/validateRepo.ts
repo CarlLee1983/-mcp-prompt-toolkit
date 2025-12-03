@@ -1,5 +1,7 @@
+import fs from 'fs'
 import path from 'path'
 import type { Severity, ToolkitError } from '../types/errors'
+import { createToolkitError } from '../schema/errors'
 import { validateRegistry } from './validateRegistry'
 import { validatePromptFile } from './validatePromptFile'
 import { validatePartialsUsage } from './validatePartialsUsage'
@@ -9,10 +11,10 @@ export interface ValidatePromptRepoOptions {
 }
 
 const SEVERITY_LEVELS: Record<Severity, number> = {
+  fatal: -1,
   error: 0,
   warning: 1,
-  info: 2,
-  debug: 3
+  info: 2
 }
 
 function filterBySeverity(errors: ToolkitError[], minSeverity: Severity = 'error'): ToolkitError[] {
@@ -20,15 +22,47 @@ function filterBySeverity(errors: ToolkitError[], minSeverity: Severity = 'error
   return errors.filter(error => SEVERITY_LEVELS[error.severity] <= minLevel)
 }
 
+function calculateSummary(errors: ToolkitError[]): { fatal: number; error: number; warning: number; info: number } {
+  return {
+    fatal: errors.filter(e => e.severity === 'fatal').length,
+    error: errors.filter(e => e.severity === 'error').length,
+    warning: errors.filter(e => e.severity === 'warning').length,
+    info: errors.filter(e => e.severity === 'info').length
+  }
+}
+
 export interface ValidatePromptRepoResult {
   passed: boolean
   errors: ToolkitError[]
+  summary: {
+    fatal: number
+    error: number
+    warning: number
+    info: number
+  }
 }
 
 export function validatePromptRepo(
   repoRoot: string,
   options: ValidatePromptRepoOptions = {}
 ): ValidatePromptRepoResult {
+  // Check if repo root exists
+  if (!fs.existsSync(repoRoot)) {
+    const error = createToolkitError(
+      'REPO_ROOT_NOT_FOUND',
+      `Repository root path not found: ${repoRoot}`,
+      undefined,
+      { expectedPath: repoRoot },
+      'Ensure the repository path exists and is accessible'
+    )
+    const filtered = filterBySeverity([error], options.minSeverity)
+    return {
+      passed: filtered.length === 0,
+      errors: filtered,
+      summary: calculateSummary(filtered)
+    }
+  }
+
   const registryPath = path.join(repoRoot, 'registry.yaml')
   const allErrors: ToolkitError[] = []
 
@@ -37,7 +71,8 @@ export function validatePromptRepo(
     const filtered = filterBySeverity(registry.errors || [], options.minSeverity)
     return {
       passed: filtered.length === 0,
-      errors: filtered
+      errors: filtered,
+      summary: calculateSummary(filtered)
     }
   }
 
@@ -50,7 +85,8 @@ export function validatePromptRepo(
     const filtered = filterBySeverity(allErrors, options.minSeverity)
     return {
       passed: filtered.length === 0,
-      errors: filtered
+      errors: filtered,
+      summary: calculateSummary(filtered)
     }
   }
 
@@ -92,6 +128,7 @@ export function validatePromptRepo(
   const filtered = filterBySeverity(allErrors, options.minSeverity)
   return {
     passed: filtered.length === 0,
-    errors: filtered
+    errors: filtered,
+    summary: calculateSummary(filtered)
   }
 }

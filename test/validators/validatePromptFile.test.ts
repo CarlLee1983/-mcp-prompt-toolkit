@@ -63,7 +63,7 @@ describe('validatePromptFile', () => {
         expect(result.errors!.length).toBeGreaterThan(0)
         expect(result.errors!.some(e => e.code === 'PROMPT_SCHEMA_INVALID')).toBe(true)
         expect(result.errors!.some(e => 
-          e.details && Array.isArray(e.details.path) && e.details.path.includes('id')
+          e.meta && Array.isArray(e.meta.path) && e.meta.path.includes('id')
         )).toBe(true)
       }
     })
@@ -79,29 +79,62 @@ describe('validatePromptFile', () => {
         expect(result.errors!.length).toBeGreaterThan(0)
         expect(result.errors!.some(e => 
           e.code === 'PROMPT_SCHEMA_INVALID' && (
-            (e.details && Array.isArray(e.details.path) && e.details.path.includes('args')) ||
+            (e.meta && Array.isArray(e.meta.path) && e.meta.path.includes('args')) ||
             e.message.includes('enum')
           )
         )).toBe(true)
       }
     })
 
-    it('should throw an error when YAML format is invalid', () => {
+    it('should return error when YAML format is invalid', () => {
       const filePath = tempDir.writeFile('invalid-yaml.yaml', invalidYamlSyntax)
 
-      expect(() => {
-        validatePromptFile(filePath)
-      }).toThrow()
+      const result = validatePromptFile(filePath)
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.errors).toBeDefined()
+        expect(result.errors!.some(e => 
+          e.code === 'FILE_NOT_YAML' || e.code === 'PROMPT_SCHEMA_INVALID'
+        )).toBe(true)
+      }
     })
   })
 
   describe('File does not exist', () => {
-    it('should throw an error when file does not exist', () => {
+    it('should return error when file does not exist', () => {
       const nonExistentPath = tempDir.getPath() + '/non-existent.yaml'
 
-      expect(() => {
-        validatePromptFile(nonExistentPath)
-      }).toThrow()
+      const result = validatePromptFile(nonExistentPath)
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.errors).toBeDefined()
+        expect(result.errors!.some(e => 
+          e.code === 'FILE_READ_FAILED' || e.code === 'PROMPT_SCHEMA_INVALID'
+        )).toBe(true)
+      }
+    })
+
+    it('should detect empty template', () => {
+      const promptWithEmptyTemplate = `
+id: test-empty
+title: Test Empty
+description: Test
+args:
+  name:
+    type: string
+template: "   "
+`
+      const filePath = tempDir.writeFile('empty-template.yaml', promptWithEmptyTemplate)
+
+      const result = validatePromptFile(filePath)
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.errors).toBeDefined()
+        expect(result.errors!.some(e => e.code === 'PROMPT_TEMPLATE_EMPTY')).toBe(true)
+      }
     })
   })
 })

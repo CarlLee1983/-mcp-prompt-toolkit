@@ -3,14 +3,14 @@ import type { ToolkitError } from '../../types/errors'
 
 function getSeverityColor(severity: ToolkitError['severity']) {
   switch (severity) {
+    case 'fatal':
+      return chalk.bgRed.white
     case 'error':
       return chalk.red
     case 'warning':
       return chalk.yellow
     case 'info':
       return chalk.blue
-    case 'debug':
-      return chalk.gray
     default:
       return chalk.red
   }
@@ -26,16 +26,16 @@ export function formatValidationErrors(errors: ToolkitError[]): string {
   }
 
   const lines: string[] = []
+  const fatalCount = errors.filter(e => e.severity === 'fatal').length
   const errorCount = errors.filter(e => e.severity === 'error').length
   const warningCount = errors.filter(e => e.severity === 'warning').length
   const infoCount = errors.filter(e => e.severity === 'info').length
-  const debugCount = errors.filter(e => e.severity === 'debug').length
 
   const counts: string[] = []
+  if (fatalCount > 0) counts.push(chalk.bgRed.white(`${fatalCount} fatal(s)`))
   if (errorCount > 0) counts.push(chalk.red(`${errorCount} error(s)`))
   if (warningCount > 0) counts.push(chalk.yellow(`${warningCount} warning(s)`))
   if (infoCount > 0) counts.push(chalk.blue(`${infoCount} info(s)`))
-  if (debugCount > 0) counts.push(chalk.gray(`${debugCount} debug(s)`))
 
   lines.push(`Found ${errors.length} validation issue(s): ${counts.join(', ')}\n`)
 
@@ -57,8 +57,12 @@ export function formatValidationErrors(errors: ToolkitError[]): string {
       const label = getSeverityLabel(error.severity)
       lines.push(color(`  [${label}] ${error.code}: ${error.message}`))
       
-      if (error.details) {
-        for (const [key, value] of Object.entries(error.details)) {
+      if (error.hint) {
+        lines.push(chalk.gray(`    Hint: ${error.hint}`))
+      }
+      
+      if (error.meta) {
+        for (const [key, value] of Object.entries(error.meta)) {
           if (key === 'chain' && Array.isArray(value)) {
             lines.push(`    Chain: ${value.join(' → ')}`)
           } else if (key === 'partial') {
@@ -85,7 +89,8 @@ export function formatValidationErrorsJson(errors: ToolkitError[]): object {
       severity: error.severity,
       message: error.message,
       file: error.file,
-      details: error.details
+      hint: error.hint,
+      meta: error.meta
     }))
   }
 }

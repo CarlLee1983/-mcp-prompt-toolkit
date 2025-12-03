@@ -53,8 +53,8 @@ describe('validatePartialsUsage', () => {
       const result = validatePartialsUsage(template, tempDir.getPath() + '/partials')
 
       expect(result).toHaveLength(1)
-      expect(result[0].code).toBe('PARTIAL_MISSING')
-      expect(result[0].details?.partial).toBe('missing-partial')
+      expect(result[0].code).toBe('PARTIAL_NOT_FOUND')
+      expect(result[0].meta?.partial).toBe('missing-partial')
     })
 
     it('should detect multiple missing partials', () => {
@@ -64,7 +64,7 @@ describe('validatePartialsUsage', () => {
       const result = validatePartialsUsage(template, tempDir.getPath() + '/partials')
 
       expect(result.length).toBeGreaterThanOrEqual(3)
-      const missingPartials = result.filter(e => e.code === 'PARTIAL_MISSING')
+      const missingPartials = result.filter(e => e.code === 'PARTIAL_NOT_FOUND')
       expect(missingPartials.length).toBeGreaterThanOrEqual(3)
     })
 
@@ -76,11 +76,11 @@ describe('validatePartialsUsage', () => {
       const result = validatePartialsUsage(template, tempDir.getPath() + '/partials')
 
       expect(result.length).toBeGreaterThanOrEqual(1)
-      const missing = result.find(e => e.code === 'PARTIAL_MISSING')
+      const missing = result.find(e => e.code === 'PARTIAL_NOT_FOUND')
       expect(missing).toBeDefined()
       if (missing) {
-        expect(missing.code).toBe('PARTIAL_MISSING')
-        expect(missing.details?.partial).toBe('missing')
+        expect(missing.code).toBe('PARTIAL_NOT_FOUND')
+        expect(missing.meta?.partial).toBe('missing')
       }
     })
   })
@@ -96,7 +96,7 @@ describe('validatePartialsUsage', () => {
       const result = validatePartialsUsage(template, tempDir.getPath() + '/partials')
 
       expect(result.length).toBeGreaterThan(0)
-      const circular = result.find(e => e.code === 'PARTIAL_CIRCULAR')
+      const circular = result.find(e => e.code === 'PARTIAL_CIRCULAR_DEPENDENCY')
       expect(circular).toBeDefined()
     })
 
@@ -111,7 +111,7 @@ describe('validatePartialsUsage', () => {
       const result = validatePartialsUsage(template, tempDir.getPath() + '/partials')
 
       expect(result.length).toBeGreaterThan(0)
-      const circular = result.find(e => e.code === 'PARTIAL_CIRCULAR')
+      const circular = result.find(e => e.code === 'PARTIAL_CIRCULAR_DEPENDENCY')
       expect(circular).toBeDefined()
     })
 
@@ -123,7 +123,7 @@ describe('validatePartialsUsage', () => {
       const result = validatePartialsUsage(template, tempDir.getPath() + '/partials')
 
       expect(result.length).toBeGreaterThan(0)
-      const circular = result.find(e => e.code === 'PARTIAL_CIRCULAR')
+      const circular = result.find(e => e.code === 'PARTIAL_CIRCULAR_DEPENDENCY')
       expect(circular).toBeDefined()
     })
   })
@@ -139,8 +139,8 @@ describe('validatePartialsUsage', () => {
       const result = validatePartialsUsage(template, tempDir.getPath() + '/partials')
 
       expect(result.length).toBeGreaterThanOrEqual(2)
-      const missing = result.find(e => e.code === 'PARTIAL_MISSING')
-      const circular = result.find(e => e.code === 'PARTIAL_CIRCULAR')
+      const missing = result.find(e => e.code === 'PARTIAL_NOT_FOUND')
+      const circular = result.find(e => e.code === 'PARTIAL_CIRCULAR_DEPENDENCY')
       expect(missing).toBeDefined()
       expect(circular).toBeDefined()
     })
@@ -168,7 +168,7 @@ describe('validatePartialsUsage', () => {
       const result = validatePartialsUsage(template, tempDir.getPath() + '/partials')
 
       expect(result.length).toBeGreaterThan(0)
-      const circular = result.find(e => e.code === 'PARTIAL_CIRCULAR')
+      const circular = result.find(e => e.code === 'PARTIAL_CIRCULAR_DEPENDENCY')
       expect(circular).toBeDefined()
     })
   })

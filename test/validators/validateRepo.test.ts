@@ -173,11 +173,11 @@ groups:
       expect(result.passed).toBe(false)
       expect(result.errors.length).toBeGreaterThan(0)
       const missingPartialError = result.errors.find(
-        e => e.code === 'PARTIAL_MISSING' && e.file && e.file.includes('api-design.yaml')
+        e => e.code === 'PARTIAL_NOT_FOUND' && e.file && e.file.includes('api-design.yaml')
       )
       expect(missingPartialError).toBeDefined()
       if (missingPartialError) {
-        expect(missingPartialError.details?.partial).toBe('missing-partial')
+        expect(missingPartialError.meta?.partial).toBe('missing-partial')
       }
     })
 
@@ -211,7 +211,7 @@ template: |
       expect(result.passed).toBe(false)
       expect(result.errors.length).toBeGreaterThan(0)
       const circularError = result.errors.find(
-        e => e.code === 'PARTIAL_CIRCULAR' && e.file && e.file.includes('api-design.yaml')
+        e => e.code === 'PARTIAL_CIRCULAR_DEPENDENCY' && e.file && e.file.includes('api-design.yaml')
       )
       expect(circularError).toBeDefined()
     })
@@ -270,10 +270,96 @@ template: |
 
       expect(result.passed).toBe(false)
       expect(result.errors.length).toBeGreaterThanOrEqual(2)
-      const missingError = result.errors.find(e => e.code === 'PARTIAL_MISSING')
-      const circularError = result.errors.find(e => e.code === 'PARTIAL_CIRCULAR')
+      const missingError = result.errors.find(e => e.code === 'PARTIAL_NOT_FOUND')
+      const circularError = result.errors.find(e => e.code === 'PARTIAL_CIRCULAR_DEPENDENCY')
       expect(missingError).toBeDefined()
       expect(circularError).toBeDefined()
+    })
+  })
+
+  describe('Summary and severity filtering', () => {
+    it('should include summary with severity counts', () => {
+      tempDir.writeFile('registry.yaml', validRegistryYaml)
+
+      tempDir.mkdir('common')
+      tempDir.writeFile('common/api-design.yaml', validPromptYaml)
+      tempDir.writeFile('common/code-review.yaml', validPromptYaml)
+
+      // Create partials directory since registry has partials enabled
+      tempDir.mkdir('partials')
+
+      tempDir.mkdir('laravel')
+      tempDir.writeFile('laravel/laravel-api-implementation.yaml', validPromptYaml)
+
+      const result = validatePromptRepo(tempDir.getPath())
+
+      expect(result.summary).toBeDefined()
+      expect(typeof result.summary.fatal).toBe('number')
+      expect(typeof result.summary.error).toBe('number')
+      expect(typeof result.summary.warning).toBe('number')
+      expect(typeof result.summary.info).toBe('number')
+      // Should pass if no errors
+      if (result.passed) {
+        expect(result.summary.fatal).toBe(0)
+        expect(result.summary.error).toBe(0)
+        expect(result.summary.warning).toBe(0)
+        expect(result.summary.info).toBe(0)
+      }
+    })
+
+    it('should filter errors by minimum severity', () => {
+      tempDir.writeFile('registry.yaml', validRegistryYaml)
+
+      tempDir.mkdir('common')
+      tempDir.writeFile('common/api-design.yaml', invalidPromptYamlMissingId)
+
+      const result = validatePromptRepo(tempDir.getPath(), { minSeverity: 'error' })
+      const errorCount = result.errors.filter(e => e.severity === 'error').length
+      const warningCount = result.errors.filter(e => e.severity === 'warning').length
+      const infoCount = result.errors.filter(e => e.severity === 'info').length
+
+      expect(errorCount).toBeGreaterThan(0)
+      expect(warningCount).toBe(0)
+      expect(infoCount).toBe(0)
+    })
+
+    it('should include warnings when minSeverity is warning', () => {
+      tempDir.writeFile('registry.yaml', validRegistryYaml)
+
+      tempDir.mkdir('common')
+      tempDir.writeFile('common/api-design.yaml', validPromptYaml)
+
+      const result = validatePromptRepo(tempDir.getPath(), { minSeverity: 'warning' })
+      
+      // Should include warnings and errors
+      const allSeverities = result.errors.map(e => e.severity)
+      expect(allSeverities.every(s => ['fatal', 'error', 'warning'].includes(s))).toBe(true)
+    })
+  })
+
+  describe('Fatal errors', () => {
+    it('should return fatal error when repo root does not exist', () => {
+      const nonExistentPath = '/non/existent/path'
+      const result = validatePromptRepo(nonExistentPath)
+
+      expect(result.passed).toBe(false)
+      expect(result.errors.length).toBeGreaterThan(0)
+      const fatalError = result.errors.find(e => e.severity === 'fatal')
+      expect(fatalError).toBeDefined()
+      expect(fatalError?.code).toBe('REPO_ROOT_NOT_FOUND')
+      expect(result.summary.fatal).toBeGreaterThan(0)
+    })
+
+    it('should return fatal error when registry file does not exist', () => {
+      // Create repo root but no registry.yaml
+      tempDir.mkdir('common')
+
+      const result = validatePromptRepo(tempDir.getPath())
+
+      expect(result.passed).toBe(false)
+      const fatalError = result.errors.find(e => e.severity === 'fatal')
+      expect(fatalError).toBeDefined()
+      expect(fatalError?.code).toBe('REGISTRY_FILE_NOT_FOUND')
     })
   })
 })

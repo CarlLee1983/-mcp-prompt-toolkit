@@ -1,6 +1,7 @@
 import { Command } from 'commander'
 import path from 'path'
 import fs from 'fs'
+import type { Severity, ToolkitError } from '../../types/errors'
 import { validatePartialsUsage } from '../../validators/validatePartialsUsage'
 import { validateRegistry } from '../../validators/validateRegistry'
 import { validatePromptFile } from '../../validators/validatePromptFile'
@@ -8,6 +9,22 @@ import { writeOutput, OutputFormat } from '../utils/output'
 import { formatValidationErrors, formatValidationErrorsJson } from '../utils/formatters'
 import { Logger } from '../utils/logger'
 import ora from 'ora'
+
+const SEVERITY_LEVELS: Record<Severity, number> = {
+  fatal: -1,
+  error: 0,
+  warning: 1,
+  info: 2
+}
+
+function filterBySeverity(errors: ToolkitError[], minSeverity: Severity): ToolkitError[] {
+  const minLevel = SEVERITY_LEVELS[minSeverity]
+  return errors.filter(error => SEVERITY_LEVELS[error.severity] <= minLevel)
+}
+
+function hasFatalErrors(errors: ToolkitError[]): boolean {
+  return errors.some(error => error.severity === 'fatal')
+}
 
 export const checkCommand = new Command('check')
   .description('Check prompt repository components')
@@ -18,7 +35,8 @@ checkCommand
   .argument('[path]', 'Repository root path', process.cwd())
   .option('-f, --format <format>', 'Output format (text|json)', 'text')
   .option('-o, --output <file>', 'Output file path')
-  .action(async (repoPath: string, options: { format: OutputFormat; output?: string }) => {
+  .option('-s, --severity <level>', 'Minimum severity level (fatal|error|warning|info)', 'error')
+  .action(async (repoPath: string, options: { format: OutputFormat; output?: string; severity: string }) => {
     const spinner = ora('Checking partials usage...').start()
 
     try {
@@ -80,7 +98,11 @@ checkCommand
         }
       }
 
-      if (allErrors.length === 0) {
+      const severity = options.severity as Severity
+      const filteredErrors = filterBySeverity(allErrors, severity)
+      const shouldExit = hasFatalErrors(filteredErrors) || filteredErrors.length > 0
+
+      if (filteredErrors.length === 0) {
         spinner.succeed('No partials usage issues found!')
         if (options.format === 'json') {
           writeOutput({ passed: true, errors: [] }, options)
@@ -89,17 +111,17 @@ checkCommand
         }
         process.exit(0)
       } else {
-        spinner.fail(`Found ${allErrors.length} partials usage issue(s)!`)
+        spinner.fail(`Found ${filteredErrors.length} partials usage issue(s)!`)
         if (options.format === 'json') {
           writeOutput({
             passed: false,
-            ...formatValidationErrorsJson(allErrors)
+            ...formatValidationErrorsJson(filteredErrors)
           }, options)
         } else {
           // eslint-disable-next-line no-console
-          console.log(formatValidationErrors(allErrors))
+          console.log(formatValidationErrors(filteredErrors))
         }
-        process.exit(1)
+        process.exit(shouldExit ? 1 : 0)
       }
     } catch (error) {
       spinner.fail('Check error occurred')

@@ -24,10 +24,11 @@ export function validatePartials(repoRoot: string, partialPath?: string): Valida
       success: false,
       errors: [
         createToolkitError(
-          'PARTIALS_FOLDER_NOT_FOUND',
-          `Partials folder not found: ${fullPath}`,
+          'PARTIAL_PATH_INVALID',
+          `Partials path is invalid: ${fullPath}`,
           undefined,
-          { expectedPath: fullPath }
+          { expectedPath: fullPath },
+          `Create the partials directory at ${fullPath} or update the registry configuration`
         )
       ]
     }

@@ -1,7 +1,7 @@
 import { Command } from 'commander'
 import path from 'path'
 import fs from 'fs'
-import type { Severity } from '../../types/errors'
+import type { Severity, ToolkitError } from '../../types/errors'
 import { validatePromptRepo } from '../../validators/validateRepo'
 import { validateRegistry } from '../../validators/validateRegistry'
 import { validatePromptFile } from '../../validators/validatePromptFile'
@@ -10,6 +10,22 @@ import { writeOutput, OutputFormat } from '../utils/output'
 import { formatValidationErrors, formatValidationErrorsJson } from '../utils/formatters'
 import { Logger } from '../utils/logger'
 import ora from 'ora'
+
+const SEVERITY_LEVELS: Record<Severity, number> = {
+  fatal: -1,
+  error: 0,
+  warning: 1,
+  info: 2
+}
+
+function filterBySeverity(errors: ToolkitError[], minSeverity: Severity): ToolkitError[] {
+  const minLevel = SEVERITY_LEVELS[minSeverity]
+  return errors.filter(error => SEVERITY_LEVELS[error.severity] <= minLevel)
+}
+
+function hasFatalErrors(errors: ToolkitError[]): boolean {
+  return errors.some(error => error.severity === 'fatal')
+}
 
 export const validateCommand = new Command('validate')
   .description('Validate prompt repository components')
@@ -21,7 +37,7 @@ validateCommand
   .option('-f, --format <format>', 'Output format (text|json)', 'text')
   .option('-o, --output <file>', 'Output file path')
   .option('--exit-code', 'Exit with non-zero code on validation failure', false)
-  .option('-s, --severity <level>', 'Minimum severity level (error|warning|info|debug)', 'error')
+  .option('-s, --severity <level>', 'Minimum severity level (fatal|error|warning|info)', 'error')
   .action(async (repoPath: string, options: { format: OutputFormat; output?: string; exitCode: boolean; severity: string }) => {
     const spinner = ora('Validating repository...').start()
 
@@ -38,23 +54,29 @@ validateCommand
       if (result.passed) {
         spinner.succeed('Repository validation passed!')
         if (options.format === 'json') {
-          writeOutput({ passed: true, errors: [] }, options)
+          writeOutput({ 
+            passed: true, 
+            errors: [],
+            summary: result.summary
+          }, options)
         } else {
           Logger.success('All validations passed!')
         }
         process.exit(0)
       } else {
         spinner.fail('Repository validation failed!')
+        const shouldExit = options.exitCode || hasFatalErrors(result.errors)
         if (options.format === 'json') {
           writeOutput({
             passed: false,
-            ...formatValidationErrorsJson(result.errors)
+            ...formatValidationErrorsJson(result.errors),
+            summary: result.summary
           }, options)
         } else {
           // eslint-disable-next-line no-console
           console.log(formatValidationErrors(result.errors))
         }
-        process.exit(options.exitCode ? 1 : 0)
+        process.exit(shouldExit ? 1 : 0)
       }
     } catch (error) {
       spinner.fail('Validation error occurred')
@@ -69,7 +91,7 @@ validateCommand
   .argument('[path]', 'Registry file path', 'registry.yaml')
   .option('-r, --repo-root <path>', 'Repository root path', process.cwd())
   .option('-f, --format <format>', 'Output format (text|json)', 'text')
-  .option('-s, --severity <level>', 'Minimum severity level (error|warning|info|debug)', 'error')
+  .option('-s, --severity <level>', 'Minimum severity level (fatal|error|warning|info)', 'error')
   .action((registryPath: string, options: { repoRoot: string; format: OutputFormat; severity: string }) => {
     const spinner = ora('Validating registry...').start()
 
@@ -95,10 +117,8 @@ validateCommand
       } else {
         spinner.fail('Registry validation failed!')
         const severity = options.severity as Severity
-        const filteredErrors = result.errors?.filter(err => {
-          const severityLevels: Record<Severity, number> = { error: 0, warning: 1, info: 2, debug: 3 }
-          return severityLevels[err.severity] <= severityLevels[severity]
-        }) || []
+        const filteredErrors = filterBySeverity(result.errors || [], severity)
+        const shouldExit = hasFatalErrors(filteredErrors)
         
         if (options.format === 'json') {
           writeOutput({ success: false, errors: formatValidationErrorsJson(filteredErrors) }, options)
@@ -107,7 +127,7 @@ validateCommand
           // eslint-disable-next-line no-console
           console.log(formatValidationErrors(filteredErrors))
         }
-        process.exit(1)
+        process.exit(shouldExit ? 1 : 0)
       }
     } catch (error) {
       spinner.fail('Validation error occurred')
@@ -121,7 +141,7 @@ validateCommand
   .description('Validate a single prompt file')
   .argument('<file-path>', 'Path to prompt YAML file')
   .option('-f, --format <format>', 'Output format (text|json)', 'text')
-  .option('-s, --severity <level>', 'Minimum severity level (error|warning|info|debug)', 'error')
+  .option('-s, --severity <level>', 'Minimum severity level (fatal|error|warning|info)', 'error')
   .action((filePath: string, options: { format: OutputFormat; severity: string }) => {
     const spinner = ora('Validating prompt file...').start()
 
@@ -146,10 +166,8 @@ validateCommand
       } else {
         spinner.fail('Prompt file validation failed!')
         const severity = options.severity as Severity
-        const severityLevels: Record<Severity, number> = { error: 0, warning: 1, info: 2, debug: 3 }
-        const filteredErrors = result.errors?.filter(err => 
-          severityLevels[err.severity] <= severityLevels[severity]
-        ) || []
+        const filteredErrors = filterBySeverity(result.errors || [], severity)
+        const shouldExit = hasFatalErrors(filteredErrors)
         
         if (options.format === 'json') {
           writeOutput({ success: false, errors: formatValidationErrorsJson(filteredErrors) }, options)
@@ -158,7 +176,7 @@ validateCommand
           // eslint-disable-next-line no-console
           console.log(formatValidationErrors(filteredErrors))
         }
-        process.exit(1)
+        process.exit(shouldExit ? 1 : 0)
       }
     } catch (error) {
       spinner.fail('Validation error occurred')
@@ -173,7 +191,7 @@ validateCommand
   .argument('[path]', 'Repository root path', process.cwd())
   .option('-p, --partials-path <path>', 'Partials directory path relative to repo root', 'partials')
   .option('-f, --format <format>', 'Output format (text|json)', 'text')
-  .option('-s, --severity <level>', 'Minimum severity level (error|warning|info|debug)', 'error')
+  .option('-s, --severity <level>', 'Minimum severity level (fatal|error|warning|info)', 'error')
   .action((repoPath: string, options: { partialsPath: string; format: OutputFormat; severity: string }) => {
     const spinner = ora('Validating partials...').start()
 
@@ -190,10 +208,8 @@ validateCommand
       if (!result.success) {
         spinner.fail('Partials validation failed!')
         const severity = options.severity as Severity
-        const severityLevels: Record<Severity, number> = { error: 0, warning: 1, info: 2, debug: 3 }
-        const filteredErrors = result.errors?.filter(err => 
-          severityLevels[err.severity] <= severityLevels[severity]
-        ) || []
+        const filteredErrors = filterBySeverity(result.errors || [], severity)
+        const shouldExit = hasFatalErrors(filteredErrors)
         
         if (options.format === 'json') {
           writeOutput({ success: false, errors: formatValidationErrorsJson(filteredErrors) }, options)
@@ -201,7 +217,7 @@ validateCommand
           // eslint-disable-next-line no-console
           console.log(formatValidationErrors(filteredErrors))
         }
-        process.exit(1)
+        process.exit(shouldExit ? 1 : 0)
       }
 
       spinner.succeed(`Found ${result.partials?.length || 0} partial file(s)!`)

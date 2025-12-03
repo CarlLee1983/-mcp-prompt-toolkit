@@ -102,11 +102,15 @@ prompt-toolkit stats [path]
 - `--format <json|text>` - Output format (default: text)
 - `--output <file>` - Write output to file
 - `--exit-code` - Exit with non-zero code on validation failure
+- `--severity <fatal|error|warning|info>` - Minimum severity level to display (default: error)
 
 **Examples:**
 ```bash
 # Validate repository with JSON output
 prompt-toolkit validate repo --format json
+
+# Validate with severity filtering (show warnings and errors)
+prompt-toolkit validate repo --severity warning
 
 # Check partials and save results to file
 prompt-toolkit check partials --format json --output results.json
@@ -130,8 +134,10 @@ const result = validatePromptRepo('/path/to/prompt-repo')
 
 if (result.passed) {
   console.log('Repository validation passed!')
+  console.log('Summary:', result.summary)
 } else {
   console.error('Validation errors:', result.errors)
+  console.error('Summary:', result.summary)
 }
 ```
 
@@ -187,7 +193,13 @@ Validates the entire prompt repository, including registry, all prompt files, an
 ```typescript
 {
   passed: boolean
-  errors: Array<{ file: string; errors: ZodError }>
+  errors: ToolkitError[]
+  summary: {
+    fatal: number
+    error: number
+    warning: number
+    info: number
+  }
 }
 ```
 
@@ -234,6 +246,93 @@ string[] // Array of file paths
 
 **Throws:**
 - `Error` if partials folder does not exist (when partialPath is provided)
+
+## 🔍 Error Codes and Severity
+
+### Severity Levels
+
+The toolkit uses four severity levels to classify validation errors:
+
+- **`fatal`**: Critical errors that prevent validation from continuing. CLI will exit with code 1.
+- **`error`**: Validation failures that should be fixed. Default minimum severity level.
+- **`warning`**: Non-critical issues that should be reviewed.
+- **`info`**: Informational messages and status updates.
+
+### Error Code Structure
+
+All error codes follow the pattern: `MODULE_PROBLEM_DESCRIPTION` (e.g., `REGISTRY_FILE_NOT_FOUND`).
+
+### Error Code Categories
+
+#### Registry Errors (`REGISTRY_*`)
+- `REGISTRY_FILE_NOT_FOUND` (fatal) - Registry file does not exist
+- `REGISTRY_SCHEMA_INVALID` (error) - Registry schema validation failed
+- `REGISTRY_GROUP_NOT_FOUND` (error) - Group folder not found
+- `REGISTRY_PROMPT_NOT_FOUND` (error) - Prompt file not found
+- `REGISTRY_DISABLED_GROUP` (info) - Group is disabled
+
+#### Prompt Errors (`PROMPT_*`)
+- `PROMPT_SCHEMA_INVALID` (error) - Prompt schema validation failed
+- `PROMPT_ID_DUPLICATED` (error) - Prompt ID is duplicated
+- `PROMPT_ARG_INVALID` (error) - Prompt argument validation failed
+- `PROMPT_TEMPLATE_EMPTY` (error) - Prompt template is empty
+
+#### Partial Errors (`PARTIAL_*`)
+- `PARTIAL_NOT_FOUND` (error) - Partial file not found
+- `PARTIAL_UNUSED` (warning) - Partial file is defined but not used
+- `PARTIAL_CIRCULAR_DEPENDENCY` (error) - Circular dependency detected
+- `PARTIAL_PATH_INVALID` (error) - Partials path is invalid
+
+#### Repository Errors (`REPO_*`)
+- `REPO_ROOT_NOT_FOUND` (fatal) - Repository root path not found
+- `REPO_STRUCTURE_INVALID` (error) - Repository structure is invalid
+
+#### File Errors (`FILE_*`)
+- `FILE_READ_FAILED` (fatal) - Failed to read file
+- `FILE_NOT_YAML` (error) - File is not a valid YAML file
+
+#### CLI Errors (`CLI_*`)
+- `CLI_INVALID_ARGUMENT` (fatal) - Invalid CLI argument
+- `CLI_UNKNOWN_COMMAND` (fatal) - Unknown CLI command
+
+### Error Object Structure
+
+```typescript
+interface ToolkitError {
+  code: string           // Error code (e.g., 'REGISTRY_FILE_NOT_FOUND')
+  severity: Severity     // 'fatal' | 'error' | 'warning' | 'info'
+  message: string        // Human-readable error message
+  file?: string          // File path where error occurred
+  hint?: string          // Helpful hint for resolving the error
+  meta?: Record<string, unknown>  // Additional error metadata
+}
+```
+
+### JSON Output Example
+
+```json
+{
+  "passed": false,
+  "errors": [
+    {
+      "code": "REGISTRY_FILE_NOT_FOUND",
+      "severity": "fatal",
+      "message": "Registry file not found: /path/to/registry.yaml",
+      "file": "/path/to/registry.yaml",
+      "hint": "Ensure the registry.yaml file exists in the repository root",
+      "meta": {
+        "expectedPath": "/path/to/registry.yaml"
+      }
+    }
+  ],
+  "summary": {
+    "fatal": 1,
+    "error": 0,
+    "warning": 0,
+    "info": 0
+  }
+}
+```
 
 ## 📝 Schema Definitions
 

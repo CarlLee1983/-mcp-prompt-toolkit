@@ -63,7 +63,7 @@ describe('validatePartials', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.errors).toBeDefined()
-        expect(result.errors!.some(e => e.code === 'PARTIALS_FOLDER_NOT_FOUND')).toBe(true)
+        expect(result.errors!.some(e => e.code === 'PARTIAL_PATH_INVALID')).toBe(true)
       }
     })
   })
