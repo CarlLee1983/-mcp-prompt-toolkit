@@ -30,6 +30,8 @@
 
 ## 🚀 Installation
 
+### As a Dependency
+
 ```bash
 # Using npm
 npm install @carllee1983/prompt-toolkit
@@ -40,6 +42,121 @@ pnpm add @carllee1983/prompt-toolkit
 # Using yarn
 yarn add @carllee1983/prompt-toolkit
 ```
+
+### Global Installation (CLI)
+
+```bash
+# Using npm
+npm install -g @carllee1983/prompt-toolkit
+
+# Using pnpm
+pnpm add -g @carllee1983/prompt-toolkit
+
+# Using yarn
+yarn global add @carllee1983/prompt-toolkit
+```
+
+### Using npx (No Installation)
+
+```bash
+# Run commands directly without installation
+npx @carllee1983/prompt-toolkit validate repo
+```
+
+## ⚡ Quick Start (5 Minutes)
+
+Get started with prompt-toolkit in just 5 minutes!
+
+### Step 1: Install
+
+```bash
+npm install -g @carllee1983/prompt-toolkit
+```
+
+### Step 2: Navigate to Your Repository
+
+```bash
+cd /path/to/your/prompt-repository
+```
+
+### Step 3: Validate
+
+```bash
+prompt-toolkit validate repo
+```
+
+### Step 4: Check Results
+
+**Success:**
+```
+✅ Repository validation passed!
+Summary: 0 fatal(s), 0 error(s), 0 warning(s), 0 info(s)
+```
+
+**Errors Found:**
+The toolkit will show you:
+- Which files have errors
+- Error codes and severity levels
+- Helpful hints for fixing issues
+- File locations
+
+### Next Steps
+
+- 📖 Read the [Usage Guide](#-usage) for detailed commands
+- 🔍 Explore [Error Codes](#-error-codes-and-severity) to understand validation results
+- 📚 Check out [Examples](examples/) for real-world scenarios
+- 🤝 Learn about [Integration with MCP Prompt Manager](#-integration-with-mcp-prompt-manager)
+
+## 💡 Use Cases
+
+### CI/CD Integration
+
+Validate prompt repositories in your CI/CD pipeline to ensure quality before deployment:
+
+```yaml
+# .github/workflows/validate-prompts.yml
+- name: Validate prompts
+  run: prompt-toolkit validate repo --exit-code --severity error
+```
+
+See [CI/CD Integration Examples](examples/ci-cd-integration/) for complete workflows.
+
+### Local Development
+
+Validate prompts during development to catch errors early:
+
+```bash
+# Watch mode (if implemented)
+prompt-toolkit validate repo --watch
+
+# Validate before commit
+prompt-toolkit validate repo --exit-code
+```
+
+### Team Collaboration
+
+Ensure all team members follow the same prompt structure:
+
+```bash
+# Validate and share results
+prompt-toolkit validate repo --format json --output validation-results.json
+```
+
+### Automated Monitoring
+
+Integrate with monitoring systems to track repository health:
+
+```javascript
+import { validatePromptRepo } from '@carllee1983/prompt-toolkit'
+
+const result = validatePromptRepo('./prompts')
+if (!result.passed) {
+  // Send alert to monitoring system
+  sendAlert(result.summary)
+}
+```
+
+See [Integration Examples](examples/integration/) for more scenarios.
 
 ## 📖 Usage
 
@@ -179,6 +296,39 @@ const partials = validatePartials('/path/to/repo-root', 'partials')
 
 console.log('Found partials:', partials)
 ```
+
+### More Examples
+
+Check out the [examples directory](examples/) for:
+- [Basic Usage Examples](examples/basic-usage/) - Simple validation scenarios
+- [Advanced Scenarios](examples/advanced-scenarios/) - Custom error handling, error code checking
+- [CI/CD Integration](examples/ci-cd-integration/) - GitHub Actions, GitLab CI workflows
+- [TypeScript Examples](examples/typescript/) - TypeScript usage patterns
+- [Integration Examples](examples/integration/) - MCP Prompt Manager, monitoring systems
+- [Real-World Scenarios](examples/real-world/) - Batch validation, CI pipelines
+
+## 🔗 Integration with MCP Prompt Manager
+
+This toolkit is designed to work seamlessly with [MCP Prompt Manager](https://github.com/CarlLee1983/mcp-prompt-manager).
+
+### Workflow
+
+1. **Develop Prompts**: Create and edit prompts in your repository
+2. **Validate Locally**: Use this toolkit to validate before committing
+   ```bash
+   prompt-toolkit validate repo
+   ```
+3. **CI/CD Validation**: Automatically validate in CI/CD pipelines
+4. **Deploy to MCP Prompt Manager**: MCP Prompt Manager loads validated prompts
+
+### Best Practices
+
+- Validate prompts before pushing to the repository
+- Use CI/CD to catch validation errors automatically
+- Monitor validation results to maintain repository health
+- Use severity filtering to focus on critical issues
+
+See [Integration Examples](examples/integration/mcp-prompt-manager-integration.js) for detailed integration code.
 
 ## 📚 API Reference
 
@@ -454,6 +604,123 @@ The project includes a pre-commit hook that automatically:
 - Ensures code quality before commits
 
 This is set up automatically when you run `pnpm install` (via the `prepare` script).
+
+## ❓ Frequently Asked Questions (FAQ)
+
+### General Questions
+
+**Q: What is a prompt repository?**  
+A: A prompt repository is a structured collection of prompt templates organized in groups, used with Model Context Protocol (MCP) systems.
+
+**Q: Do I need to install this globally?**  
+A: No, you can use `npx @carllee1983/prompt-toolkit` without installation, or install it as a project dependency.
+
+**Q: Can I use this with TypeScript?**  
+A: Yes! The package includes full TypeScript type definitions. See [TypeScript Examples](examples/typescript/) for usage patterns.
+
+### Validation Questions
+
+**Q: What happens if validation fails?**  
+A: The CLI will show detailed error information including error codes, severity levels, file locations, and hints. Use `--exit-code` to make CI/CD pipelines fail on errors.
+
+**Q: Can I filter errors by severity?**  
+A: Yes! Use the `--severity` option: `prompt-toolkit validate repo --severity warning` to show warnings and errors.
+
+**Q: How do I validate multiple repositories?**  
+A: Use the programmatic API in a script. See [Batch Validation Example](examples/real-world/batch-validation.js).
+
+### Error Handling
+
+**Q: What's the difference between fatal, error, warning, and info?**  
+A: 
+- **fatal**: Critical errors that prevent validation (e.g., missing registry file)
+- **error**: Validation failures that should be fixed
+- **warning**: Non-critical issues to review
+- **info**: Informational messages
+
+**Q: How do I handle specific error codes?**  
+A: Use `ERROR_CODE_CONSTANTS` and filter errors by code. See [Error Code Checker Example](examples/advanced-scenarios/error-code-checker.js).
+
+### CI/CD Questions
+
+**Q: How do I integrate this into GitHub Actions?**  
+A: See the [GitHub Actions Example](examples/ci-cd-integration/github-actions.yml) for a complete workflow.
+
+**Q: Can I get JSON output for parsing?**  
+A: Yes! Use `--format json` to get machine-readable output: `prompt-toolkit validate repo --format json`.
+
+**Q: How do I fail CI on validation errors?**  
+A: Use `--exit-code` flag: `prompt-toolkit validate repo --exit-code`.
+
+### Troubleshooting
+
+**Q: "Registry file not found" error**  
+A: Ensure `registry.yaml` exists in the repository root. Check the path you're validating.
+
+**Q: "Partial not found" error**  
+A: Check that the partial file exists in the partials directory and the path in the template is correct.
+
+**Q: "Circular dependency" error**  
+A: Partials are referencing each other in a loop. Review your partial dependencies and break the cycle.
+
+For more troubleshooting help, see the [Troubleshooting Guide](docs/TROUBLESHOOTING.md).
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### Registry File Not Found
+
+**Error**: `REGISTRY_FILE_NOT_FOUND` (fatal)
+
+**Solution**:
+1. Ensure `registry.yaml` exists in the repository root
+2. Check the path: `prompt-toolkit validate repo /correct/path`
+3. Verify file permissions
+
+#### Invalid YAML Syntax
+
+**Error**: `FILE_NOT_YAML` (error)
+
+**Solution**:
+1. Validate YAML syntax using an online YAML validator
+2. Check for indentation issues (YAML is sensitive to spaces)
+3. Ensure no tabs are used (use spaces instead)
+
+#### Missing Partials
+
+**Error**: `PARTIAL_NOT_FOUND` (error)
+
+**Solution**:
+1. Verify the partial file exists in the `partials/` directory
+2. Check the partial path in your template (e.g., `{{> partial-name}}`)
+3. Ensure the partials directory path is correct in `registry.yaml`
+
+#### Circular Dependencies
+
+**Error**: `PARTIAL_CIRCULAR_DEPENDENCY` (error)
+
+**Solution**:
+1. Review partial dependencies
+2. Break the circular reference by restructuring partials
+3. Use the error's `meta.chain` to see the dependency cycle
+
+#### Schema Validation Errors
+
+**Error**: `PROMPT_SCHEMA_INVALID` or `REGISTRY_SCHEMA_INVALID` (error)
+
+**Solution**:
+1. Check the [Schema Definitions](#-schema-definitions) section
+2. Ensure all required fields are present
+3. Verify field types match the schema
+
+### Getting Help
+
+- 📖 Check the [Documentation](#-usage) for detailed usage
+- 🔍 Review [Error Codes](#-error-codes-and-severity) for error meanings
+- 💡 See [Examples](examples/) for usage patterns
+- 🐛 Open an [Issue](https://github.com/CarlLee1983/mcp-prompt-toolkit/issues) if you find a bug
+- 💬 Check [FAQ](#-frequently-asked-questions-faq) for common questions
 
 ## 📦 Project Structure
 

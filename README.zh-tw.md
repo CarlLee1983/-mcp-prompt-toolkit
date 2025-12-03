@@ -30,6 +30,8 @@
 
 ## 🚀 安裝
 
+### 作為依賴套件
+
 ```bash
 # 使用 npm
 npm install @carllee1983/prompt-toolkit
@@ -40,6 +42,121 @@ pnpm add @carllee1983/prompt-toolkit
 # 使用 yarn
 yarn add @carllee1983/prompt-toolkit
 ```
+
+### 全域安裝（CLI）
+
+```bash
+# 使用 npm
+npm install -g @carllee1983/prompt-toolkit
+
+# 使用 pnpm
+pnpm add -g @carllee1983/prompt-toolkit
+
+# 使用 yarn
+yarn global add @carllee1983/prompt-toolkit
+```
+
+### 使用 npx（無需安裝）
+
+```bash
+# 直接執行命令，無需安裝
+npx @carllee1983/prompt-toolkit validate repo
+```
+
+## ⚡ 快速開始（5 分鐘）
+
+在 5 分鐘內開始使用 prompt-toolkit！
+
+### 步驟 1：安裝
+
+```bash
+npm install -g @carllee1983/prompt-toolkit
+```
+
+### 步驟 2：導航到您的倉庫
+
+```bash
+cd /path/to/your/prompt-repository
+```
+
+### 步驟 3：驗證
+
+```bash
+prompt-toolkit validate repo
+```
+
+### 步驟 4：檢查結果
+
+**成功：**
+```
+✅ Repository validation passed!
+Summary: 0 fatal(s), 0 error(s), 0 warning(s), 0 info(s)
+```
+
+**發現錯誤：**
+工具會顯示：
+- 哪些檔案有錯誤
+- 錯誤碼和嚴重程度
+- 修復問題的提示
+- 檔案位置
+
+### 下一步
+
+- 📖 閱讀[使用指南](#-使用方式)了解詳細命令
+- 🔍 探索[錯誤碼](#-錯誤碼與嚴重程度)了解驗證結果
+- 📚 查看[範例](examples/)了解實際使用場景
+- 🤝 了解[與 MCP Prompt Manager 整合](#-與-mcp-prompt-manager-整合)
+
+## 💡 使用案例
+
+### CI/CD 整合
+
+在 CI/CD 流程中驗證提示倉庫，確保部署前的品質：
+
+```yaml
+# .github/workflows/validate-prompts.yml
+- name: Validate prompts
+  run: prompt-toolkit validate repo --exit-code --severity error
+```
+
+查看[CI/CD 整合範例](examples/ci-cd-integration/)了解完整工作流程。
+
+### 本地開發
+
+在開發過程中驗證提示，及早發現錯誤：
+
+```bash
+# 監看模式（如果已實作）
+prompt-toolkit validate repo --watch
+
+# 提交前驗證
+prompt-toolkit validate repo --exit-code
+```
+
+### 團隊協作
+
+確保所有團隊成員遵循相同的提示結構：
+
+```bash
+# 驗證並分享結果
+prompt-toolkit validate repo --format json --output validation-results.json
+```
+
+### 自動化監控
+
+與監控系統整合以追蹤倉庫健康狀態：
+
+```javascript
+import { validatePromptRepo } from '@carllee1983/prompt-toolkit'
+
+const result = validatePromptRepo('./prompts')
+if (!result.passed) {
+  // 發送警報到監控系統
+  sendAlert(result.summary)
+}
+```
+
+查看[整合範例](examples/integration/)了解更多場景。
 
 ## 📖 使用方式
 
@@ -173,6 +290,39 @@ const partials = validatePartials('/path/to/repo-root', 'partials')
 
 console.log('Found partials:', partials)
 ```
+
+### 更多範例
+
+查看 [examples 目錄](examples/) 了解：
+- [基本使用範例](examples/basic-usage/) - 簡單驗證場景
+- [進階場景](examples/advanced-scenarios/) - 自訂錯誤處理、錯誤碼檢查
+- [CI/CD 整合](examples/ci-cd-integration/) - GitHub Actions、GitLab CI 工作流程
+- [TypeScript 範例](examples/typescript/) - TypeScript 使用模式
+- [整合範例](examples/integration/) - MCP Prompt Manager、監控系統
+- [實際場景](examples/real-world/) - 批次驗證、CI 流程
+
+## 🔗 與 MCP Prompt Manager 整合
+
+此工具集設計為與 [MCP Prompt Manager](https://github.com/CarlLee1983/mcp-prompt-manager) 無縫整合。
+
+### 工作流程
+
+1. **開發提示**：在倉庫中建立和編輯提示
+2. **本地驗證**：使用此工具集在提交前驗證
+   ```bash
+   prompt-toolkit validate repo
+   ```
+3. **CI/CD 驗證**：在 CI/CD 流程中自動驗證
+4. **部署到 MCP Prompt Manager**：MCP Prompt Manager 載入已驗證的提示
+
+### 最佳實踐
+
+- 在推送到倉庫前驗證提示
+- 使用 CI/CD 自動捕捉驗證錯誤
+- 監控驗證結果以維持倉庫健康
+- 使用嚴重程度過濾以專注於關鍵問題
+
+查看[整合範例](examples/integration/mcp-prompt-manager-integration.js)了解詳細整合程式碼。
 
 ## 📚 API 參考
 
@@ -355,6 +505,123 @@ pnpm lint:fix
 - 確保 commit 前的程式碼品質
 
 當你執行 `pnpm install` 時會自動設定（透過 `prepare` script）。
+
+## ❓ 常見問題（FAQ）
+
+### 一般問題
+
+**Q: 什麼是提示倉庫？**  
+A: 提示倉庫是一個結構化的提示模板集合，按群組組織，用於 Model Context Protocol (MCP) 系統。
+
+**Q: 我需要全域安裝嗎？**  
+A: 不需要，您可以使用 `npx @carllee1983/prompt-toolkit` 無需安裝，或將其安裝為專案依賴。
+
+**Q: 可以使用 TypeScript 嗎？**  
+A: 可以！套件包含完整的 TypeScript 型別定義。查看[TypeScript 範例](examples/typescript/)了解使用模式。
+
+### 驗證問題
+
+**Q: 如果驗證失敗會發生什麼？**  
+A: CLI 會顯示詳細的錯誤資訊，包括錯誤碼、嚴重程度、檔案位置和提示。使用 `--exit-code` 讓 CI/CD 流程在錯誤時失敗。
+
+**Q: 可以依嚴重程度過濾錯誤嗎？**  
+A: 可以！使用 `--severity` 選項：`prompt-toolkit validate repo --severity warning` 以顯示警告和錯誤。
+
+**Q: 如何驗證多個倉庫？**  
+A: 在腳本中使用程式化 API。查看[批次驗證範例](examples/real-world/batch-validation.js)。
+
+### 錯誤處理
+
+**Q: fatal、error、warning 和 info 有什麼區別？**  
+A: 
+- **fatal**：阻止驗證繼續的嚴重錯誤（例如，缺少 registry 檔案）
+- **error**：應該修復的驗證失敗
+- **warning**：需要審查的非關鍵問題
+- **info**：資訊性訊息
+
+**Q: 如何處理特定錯誤碼？**  
+A: 使用 `ERROR_CODE_CONSTANTS` 並依錯誤碼過濾。查看[錯誤碼檢查範例](examples/advanced-scenarios/error-code-checker.js)。
+
+### CI/CD 問題
+
+**Q: 如何整合到 GitHub Actions？**  
+A: 查看[GitHub Actions 範例](examples/ci-cd-integration/github-actions.yml)了解完整工作流程。
+
+**Q: 可以取得 JSON 輸出以便解析嗎？**  
+A: 可以！使用 `--format json` 取得機器可讀的輸出：`prompt-toolkit validate repo --format json`。
+
+**Q: 如何在驗證錯誤時讓 CI 失敗？**  
+A: 使用 `--exit-code` 標誌：`prompt-toolkit validate repo --exit-code`。
+
+### 故障排除
+
+**Q: "Registry file not found" 錯誤**  
+A: 確保 `registry.yaml` 存在於倉庫根目錄。檢查您正在驗證的路徑。
+
+**Q: "Partial not found" 錯誤**  
+A: 檢查 partial 檔案是否存在於 partials 目錄中，以及模板中的路徑是否正確。
+
+**Q: "Circular dependency" 錯誤**  
+A: Partials 在循環中互相引用。檢視您的 partial 相依關係並打破循環。
+
+更多故障排除幫助，請查看[故障排除指南](docs/TROUBLESHOOTING.md)。
+
+## 🔧 故障排除
+
+### 常見問題
+
+#### Registry 檔案未找到
+
+**錯誤**：`REGISTRY_FILE_NOT_FOUND` (fatal)
+
+**解決方案**：
+1. 確保 `registry.yaml` 存在於倉庫根目錄
+2. 檢查路徑：`prompt-toolkit validate repo /正確/路徑`
+3. 驗證檔案權限
+
+#### 無效的 YAML 語法
+
+**錯誤**：`FILE_NOT_YAML` (error)
+
+**解決方案**：
+1. 使用線上 YAML 驗證器驗證 YAML 語法
+2. 檢查縮排問題（YAML 對空格敏感）
+3. 確保沒有使用 tab（使用空格代替）
+
+#### 缺少 Partials
+
+**錯誤**：`PARTIAL_NOT_FOUND` (error)
+
+**解決方案**：
+1. 驗證 partial 檔案存在於 `partials/` 目錄中
+2. 檢查模板中的 partial 路徑（例如，`{{> partial-name}}`）
+3. 確保 `registry.yaml` 中的 partials 目錄路徑正確
+
+#### 循環相依
+
+**錯誤**：`PARTIAL_CIRCULAR_DEPENDENCY` (error)
+
+**解決方案**：
+1. 檢視 partial 相依關係
+2. 透過重構 partials 打破循環引用
+3. 使用錯誤的 `meta.chain` 查看相依循環
+
+#### 結構驗證錯誤
+
+**錯誤**：`PROMPT_SCHEMA_INVALID` 或 `REGISTRY_SCHEMA_INVALID` (error)
+
+**解決方案**：
+1. 檢查[結構定義](#-結構定義)區塊
+2. 確保所有必填欄位都存在
+3. 驗證欄位型別符合結構
+
+### 取得幫助
+
+- 📖 查看[使用指南](#-使用方式)了解詳細使用
+- 🔍 檢視[錯誤碼](#-錯誤碼與嚴重程度)了解錯誤含義
+- 💡 查看[範例](examples/)了解使用模式
+- 🐛 開啟[Issue](https://github.com/CarlLee1983/mcp-prompt-toolkit/issues) 如果您發現錯誤
+- 💬 查看[FAQ](#-常見問題faq)了解常見問題
 
 ## 📦 專案結構
 
