@@ -7,6 +7,44 @@ and this project is licensed under [ISC](LICENSE).
 
 ## [Unreleased]
 
+## [1.0.0] - 2025-12-03
+
+### 🎉 Production Ready Release
+
+This release marks the **production-ready** milestone of `@carllee1983/prompt-toolkit`. Starting from version 1.0.0, the toolkit follows semantic versioning and maintains API stability within major versions.
+
+### Added
+
+- **API Stability Documentation**: Comprehensive API stability guarantees and versioning strategy
+  - See [API Stability](docs/API_STABILITY.md) for details
+- **Migration Guide**: Complete guide for upgrading from 0.4.x to 1.0.0
+  - See [Migration Guide](docs/MIGRATION_GUIDE.md) for step-by-step instructions
+- **Production Ready Badge**: Clear indication of production readiness
+- **Enhanced Documentation**: 
+  - API stability commitments
+  - Version control strategy
+  - Long-term support policy
+
+### Changed
+
+- **Version Number**: 0.4.2 → 1.0.0 (no breaking changes)
+- **README Updates**: Added production-ready indicators and API stability information
+- **Documentation**: Enhanced with API stability and migration information
+
+### Notes
+
+- **No Breaking Changes**: This release is fully backward compatible with 0.4.2
+- **API Stability**: All public APIs are now considered stable
+- **Semantic Versioning**: Starting from 1.0.0, breaking changes will only occur in major versions (2.0.0, 3.0.0, etc.)
+- **Migration**: No code changes required when upgrading from 0.4.x
+
+### What This Means
+
+- ✅ **Stable API**: Public APIs will remain stable in 1.x.x versions
+- ✅ **Production Ready**: Safe to use in production environments
+- ✅ **Long-term Support**: Clear versioning strategy for future updates
+- ✅ **Backward Compatible**: All existing code continues to work
+
 ## [0.4.2] - 2025-12-03
 
 ### Changed

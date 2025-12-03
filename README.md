@@ -4,7 +4,8 @@
 
 **Prompt repository governance toolkit for MCP**
 
-[![Version](https://img.shields.io/badge/version-0.4.1-blue.svg)](https://github.com/CarlLee1983/prompts-tooling-sdk)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/CarlLee1983/prompts-tooling-sdk)
+[![Production Ready](https://img.shields.io/badge/production-ready-success.svg)](https://github.com/CarlLee1983/prompts-tooling-sdk)
 [![License](https://img.shields.io/badge/license-ISC-green.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4+-blue.svg)](https://www.typescriptlang.org/)
 [![Node](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
@@ -13,7 +14,9 @@
 
 ## 📋 Introduction
 
-`@carllee1983/prompt-toolkit` is a TypeScript toolkit designed for validating and managing prompt repositories used with Model Context Protocol (MCP). It provides comprehensive validation for registry files, prompt definitions, and partials directories, ensuring the integrity and correctness of prompt repositories.
+`@carllee1983/prompt-toolkit` is a **production-ready** TypeScript toolkit designed for validating and managing prompt repositories used with Model Context Protocol (MCP). It provides comprehensive validation for registry files, prompt definitions, and partials directories, ensuring the integrity and correctness of prompt repositories.
+
+**Version 1.0.0** marks the stable release with API stability guarantees. Starting from 1.0.0, the toolkit follows semantic versioning and maintains backward compatibility within major versions.
 
 ## ✨ Features
 
@@ -27,6 +30,8 @@
 - **Code Quality**: ESLint configuration with automatic formatting
 - **Git Hooks**: Pre-commit hook for automatic lint fixes
 - **Comprehensive Testing**: 88 unit tests with comprehensive coverage
+- **Production Ready**: Stable API with semantic versioning guarantees
+- **API Stability**: Backward compatibility within major versions
 
 ## 🚀 Installation
 
@@ -240,6 +245,19 @@ prompt-toolkit stats --format json
 ```
 
 ### Programmatic Usage
+
+#### API Stability
+
+Starting from version 1.0.0, all public APIs are **stable** and follow semantic versioning:
+
+- **1.x.x**: Backward compatible - no breaking changes
+- **2.0.0+**: Breaking changes (with migration guide)
+
+See [API Stability Documentation](docs/API_STABILITY.md) for details.
+
+#### Migration from 0.4.x
+
+Upgrading from 0.4.x to 1.0.0 requires **no code changes** - the API is fully backward compatible. See [Migration Guide](docs/MIGRATION_GUIDE.md) for details.
 
 ### Basic Example
 
@@ -721,6 +739,15 @@ For more troubleshooting help, see the [Troubleshooting Guide](docs/TROUBLESHOOT
 - 💡 See [Examples](examples/) for usage patterns
 - 🐛 Open an [Issue](https://github.com/CarlLee1983/mcp-prompt-toolkit/issues) if you find a bug
 - 💬 Check [FAQ](#-frequently-asked-questions-faq) for common questions
+
+## 📚 Additional Documentation
+
+- **[API Stability](docs/API_STABILITY.md)**: API stability guarantees and versioning strategy
+- **[Migration Guide](docs/MIGRATION_GUIDE.md)**: Guide for upgrading from 0.4.x to 1.0.0
+- **[Use Cases](docs/USE_CASES.md)**: Real-world usage scenarios and examples
+- **[Best Practices](docs/BEST_PRACTICES.md)**: Recommended patterns and practices
+- **[Quick Reference](docs/QUICK_REFERENCE.md)**: Quick command and API reference
+- **[Troubleshooting](docs/TROUBLESHOOTING.md)**: Common issues and solutions
 
 ## 📦 Project Structure
 

@@ -4,7 +4,8 @@
 
 **適用於 MCP 的提示倉庫治理工具集**
 
-[![Version](https://img.shields.io/badge/version-0.4.1-blue.svg)](https://github.com/CarlLee1983/prompts-tooling-sdk)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/CarlLee1983/prompts-tooling-sdk)
+[![Production Ready](https://img.shields.io/badge/production-ready-success.svg)](https://github.com/CarlLee1983/prompts-tooling-sdk)
 [![License](https://img.shields.io/badge/license-ISC-green.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4+-blue.svg)](https://www.typescriptlang.org/)
 [![Node](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
@@ -13,7 +14,9 @@
 
 ## 📋 簡介
 
-`@carllee1983/prompt-toolkit` 是一套以 TypeScript 撰寫的工具集，專為驗證與管理 Model Context Protocol (MCP) 所使用的提示倉庫而設計。它提供對 registry 檔案、提示定義與 partials 目錄的完整驗證，確保提示倉庫的完整性與正確性。
+`@carllee1983/prompt-toolkit` 是一套**生產就緒**的 TypeScript 工具集，專為驗證與管理 Model Context Protocol (MCP) 所使用的提示倉庫而設計。它提供對 registry 檔案、提示定義與 partials 目錄的完整驗證，確保提示倉庫的完整性與正確性。
+
+**版本 1.0.0** 標示穩定發布，並提供 API 穩定性保證。從 1.0.0 開始，工具集遵循語義化版本控制，並在主版本內保持向後兼容。
 
 ## ✨ 特色
 
@@ -26,7 +29,9 @@
 - **結構驗證**：基於 Zod 的結構驗證，提供穩健的型別檢查
 - **程式碼品質**：ESLint 設定與自動格式化
 - **Git Hooks**：Pre-commit hook 自動執行 lint 修復
-- **完善測試**：82 個單元測試，涵蓋完整功能
+- **完善測試**：88 個單元測試，涵蓋完整功能
+- **生產就緒**：穩定的 API 與語義化版本控制保證
+- **API 穩定性**：主版本內保持向後兼容
 
 ## 🚀 安裝
 
@@ -236,6 +241,19 @@ prompt-toolkit stats --format json
 ```
 
 ### 程式化使用方式
+
+#### API 穩定性
+
+從版本 1.0.0 開始，所有公開 API 都是**穩定**的，並遵循語義化版本控制：
+
+- **1.x.x**：向後兼容 - 無破壞性變更
+- **2.0.0+**：破壞性變更（附遷移指南）
+
+詳見 [API 穩定性文檔](docs/API_STABILITY.md)。
+
+#### 從 0.4.x 遷移
+
+從 0.4.x 升級到 1.0.0 **無需修改程式碼** - API 完全向後兼容。詳見 [遷移指南](docs/MIGRATION_GUIDE.md)。
 
 ### 基本範例
 
@@ -622,6 +640,15 @@ A: Partials 在循環中互相引用。檢視您的 partial 相依關係並打�
 - 💡 查看[範例](examples/)了解使用模式
 - 🐛 開啟[Issue](https://github.com/CarlLee1983/mcp-prompt-toolkit/issues) 如果您發現錯誤
 - 💬 查看[FAQ](#-常見問題faq)了解常見問題
+
+## 📚 額外文檔
+
+- **[API 穩定性](docs/API_STABILITY.md)**：API 穩定性保證與版本控制策略
+- **[遷移指南](docs/MIGRATION_GUIDE.md)**：從 0.4.x 升級到 1.0.0 的指南
+- **[使用案例](docs/USE_CASES.md)**：實際使用場景與範例
+- **[最佳實踐](docs/BEST_PRACTICES.md)**：推薦的模式與實踐
+- **[快速參考](docs/QUICK_REFERENCE.md)**：命令與 API 快速參考
+- **[故障排除](docs/TROUBLESHOOTING.md)**：常見問題與解決方案
 
 ## 📦 專案結構
 

@@ -66,7 +66,7 @@ When using this toolkit:
 
 ## Security Updates
 
-Security updates will be released as patch versions (e.g., 0.4.0 → 0.4.1) and will be documented in:
+Security updates will be released as patch versions (e.g., 1.0.0 → 1.0.1) and will be documented in:
 - GitHub Security Advisories
 - CHANGELOG.md
 - Release notes

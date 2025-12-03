@@ -64,14 +64,14 @@ v{major}.{minor}.{patch}
 v1.0.0
 
 # Minor version
-v0.4.0
+v1.1.0
 
 # Patch version
-v0.3.2
+v1.0.1
 
 # Pre-release versions
-v0.4.0-beta.1
-v0.4.0-rc.1
+v1.0.0-beta.1
+v1.0.0-rc.1
 ```
 
 ### Creating a Release
@@ -82,10 +82,10 @@ We use `npm version` to manage releases, ensuring `package.json`, commit, and ta
 
 1. **Use `npm version` to bump version**:
    ```bash
-   # For patch releases (0.3.2 → 0.3.3)
+   # For patch releases (1.0.0 → 1.0.1)
    npm version patch -m "chore: bump version to %s"
    
-   # For minor releases (0.3.2 → 0.4.0)
+   # For minor releases (1.0.0 → 1.1.0)
    npm version minor -m "chore: bump version to %s"
    
    # For major releases (0.3.2 → 1.0.0)
