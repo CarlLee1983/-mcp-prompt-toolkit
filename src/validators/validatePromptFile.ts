@@ -32,11 +32,11 @@ export function validatePromptFile(filePath: string): ValidatePromptFileResult {
   }
 
   const result = PromptSchema.safeParse(data)
-  
+
   if (!result.success) {
-    const errors: ToolkitError[] = result.error.errors.map(err => 
-        createToolkitError(
-          ERROR_CODE_CONSTANTS.PROMPT_SCHEMA_INVALID,
+    const errors: ToolkitError[] = result.error.issues.map((err: z.ZodIssue) =>
+      createToolkitError(
+        ERROR_CODE_CONSTANTS.PROMPT_SCHEMA_INVALID,
         `${err.path.join('.')}: ${err.message}`,
         filePath,
         {

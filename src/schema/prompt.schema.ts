@@ -11,6 +11,6 @@ export const PromptSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   description: z.string().min(1),
-  args: z.record(PromptArgSchema),
+  args: z.record(z.string(), PromptArgSchema),
   template: z.string().min(1)
 })

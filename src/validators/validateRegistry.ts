@@ -29,7 +29,15 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
     }
   }
 
-  let parsed: z.SafeParseReturnType<unknown, z.infer<typeof RegistrySchema>>
+  // Explicitly define the expected shape since Zod inference might be tricky with v4
+  interface GroupDef {
+    path: string
+    enabled: boolean
+    prompts: string[]
+  }
+
+  let parsed: { success: true; data: z.infer<typeof RegistrySchema> } | { success: false; error: z.ZodError }
+
   try {
     parsed = RegistrySchema.safeParse(loadYaml(registryPath))
   } catch (error) {
@@ -50,9 +58,9 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
   }
 
   if (!parsed.success) {
-    const errors: ToolkitError[] = parsed.error.errors.map(err =>
-        createToolkitError(
-          ERROR_CODE_CONSTANTS.REGISTRY_SCHEMA_INVALID,
+    const errors: ToolkitError[] = parsed.error.issues.map((err: z.ZodIssue) =>
+      createToolkitError(
+        ERROR_CODE_CONSTANTS.REGISTRY_SCHEMA_INVALID,
         `${err.path.join('.')}: ${err.message}`,
         registryPath,
         {
@@ -72,7 +80,8 @@ export function validateRegistry(registryPath: string, repoRoot: string): Valida
   const errors: ToolkitError[] = []
   const { groups } = parsed.data
 
-  for (const [group, def] of Object.entries(groups)) {
+  for (const [group, rawDef] of Object.entries(groups)) {
+    const def = rawDef as GroupDef
     if (!def.enabled) {
       // Skip disabled groups, but could add info level error if needed
       continue
