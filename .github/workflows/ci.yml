@@ -21,8 +21,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         id: pnpm-install
-        with:
-          version: 9
+
 
       # 3️⃣ Setup Node.js (requires Node 18+)
       - name: Setup Node.js
